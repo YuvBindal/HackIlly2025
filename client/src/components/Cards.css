@@ -1,130 +1,258 @@
-/* Import Google Font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap');
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
+/* Card Container */
+.card-container {
+  perspective: 1000px;
+  margin-bottom: 1rem;
 }
 
-/* Container for All Cards */
-.cards-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 50px; /* Increased spacing between cards */
-    flex-wrap: wrap;
-    margin-top: 40px;
-    max-width: 1200px;
-    margin: 0 auto;
+/* Solana Styled Card */
+.solana-card {
+  position: relative;
+  background: rgba(30, 30, 48, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 1.6rem;
+  color: #fff;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transform-style: preserve-3d;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  will-change: transform;
+  height: 100%;
+  min-height: 180px;
 }
 
-/* Card Base Styling */
-.card {
-    width: 370px; /* Slight reduction from 400px to 370px */
-    height: 220px;
-    padding: 25px;
-    border-radius: 20px;
-    position: relative;
-    background: rgba(30, 30, 48, 0.9); /* Soft dark theme */
-    backdrop-filter: blur(15px);
-    box-shadow: 0px 10px 30px rgba(78, 78, 106, 0.2); /* Soft grey glow */
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-    overflow: hidden;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    text-align: left;
+.solana-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--card-gradient);
+  opacity: 0.1;
+  z-index: -1;
+  border-radius: inherit;
+  transition: opacity 0.5s ease;
 }
 
-/* Subtle Neon Glow Hover Effect */
-.card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0px 15px 40px rgba(78, 78, 106, 0.3);
+.solana-card:hover::before {
+  opacity: 0.2;
+  background: var(--card-hover-gradient);
 }
 
-/* Card Headers */
-.card h3 {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 10px;
+.solana-card:hover {
+  border-color: rgba(0, 255, 163, 0.3);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 255, 163, 0.2);
+  transform: translateY(-5px);
 }
 
-/* Card Descriptions */
-.card p {
-    font-size: 16px;
-    color: #ddd;
-    margin-bottom: 10px;
+.solana-card.active {
+  border-color: rgba(0, 255, 163, 0.4);
+  background: rgba(30, 30, 48, 0.7);
 }
 
-/* Card Stat */
-.card-stat {
-    font-size: 14px;
-    font-weight: bold;
-    color: #00FFA3; /* Solana Green */
+.solana-card.active::before {
+  opacity: 0.25;
 }
 
-/* Icon Styles */
+/* Card Glow Effect */
+.card-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), 
+              rgba(0, 255, 163, 0.4) 0%, 
+              rgba(0, 0, 0, 0) 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  z-index: 0;
+}
+
+.solana-card:hover .card-glow {
+  opacity: 0.15;
+  --x: var(--mouse-x);
+  --y: var(--mouse-y);
+}
+
+.solana-card.active .card-glow {
+  opacity: 0.2;
+}
+
+/* Card Content */
+.solana-card-content {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  margin-right: 1rem;
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.solana-card:hover .icon-container {
+  background: var(--card-gradient);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transform: translateZ(20px);
+}
+
 .card-icon {
-    font-size: 36px;
-    color: #29C7FE; /* Subtle Solana Blue */
-    margin-bottom: 15px;
+  font-size: 1.4rem;
+  color: #fff;
+  transition: all 0.3s ease;
 }
 
-/* Minimalistic Neon Borders */
-.nfts {
-    border-left: 4px solid #00FFA3;
-    box-shadow: 0px 5px 20px rgba(0, 255, 163, 0.1);
+.solana-card:hover .card-icon {
+  color: #fff;
+  transform: scale(1.1);
 }
 
-.network {
-    border-left: 4px solid #29C7FE;
-    box-shadow: 0px 5px 20px rgba(41, 199, 254, 0.1);
+.card-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  transition: all 0.3s ease;
+  transform: translateZ(10px);
 }
 
-.sentiment {
-    border-left: 4px solid #E40F91;
-    box-shadow: 0px 5px 20px rgba(228, 15, 145, 0.1);
+.solana-card:hover .card-title {
+  background: var(--card-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.ai {
-    border-left: 4px solid #9945FF;
-    box-shadow: 0px 5px 20px rgba(153, 69, 255, 0.1);
-}
-
-/* Remove the "CASE STUDY" Tag */
-.tag {
-    display: none;
-}
-
-/* Remove Button */
-.cta-btn {
-    display: none;
-}
-
-/* Responsive Design */
-@media (max-width: 900px) {
-    .cards-container {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .card {
-        width: 90%;
-        height: auto;
-    }
-}
-
+/* Network Stats */
 .network-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin: 10px 0;
+  margin: 0.5rem 0 1rem;
+  flex-grow: 1;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
 }
 
-.network-stats div {
-    font-size: 0.9rem;
-    color: #666;
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.stat-label {
+  opacity: 0.7;
+}
+
+.stat-value {
+  font-weight: 600;
+  color: #fff;
+}
+
+.solana-card:hover .network-stats {
+  transform: translateZ(15px);
+}
+
+/* Card Footer */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.card-stat {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+}
+
+.solana-card:hover .card-stat {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Active Indicator */
+.active-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--card-gradient);
+  box-shadow: 0 0 10px rgba(0, 255, 163, 0.6);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 255, 163, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 5px rgba(0, 255, 163, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 255, 163, 0);
+  }
+}
+
+/* Card Type-Specific Styles */
+.solana-card.nfts .icon-container {
+  background: rgba(0, 255, 163, 0.1);
+}
+
+.solana-card.network .icon-container {
+  background: rgba(153, 69, 255, 0.1);
+}
+
+.solana-card.sentiment .icon-container {
+  background: rgba(228, 15, 145, 0.1);
+}
+
+.solana-card.ai .icon-container {
+  background: rgba(41, 199, 254, 0.1);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .solana-card {
+    padding: 1.2rem;
+  }
+  
+  .card-title {
+    font-size: 1.1rem;
+  }
+  
+  .network-stats {
+    font-size: 0.85rem;
+  }
 }

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Card from "../components/Card";
 import Navbar from "../components/navbar";
 import "./Dashboard.css";
+import NetworkContent from '../components/NetworkContent';
 
 const Dashboard = () => {
     const { user, logout } = usePrivy();
@@ -68,139 +69,139 @@ const Dashboard = () => {
         return `${address.slice(0, 6)}...${address.slice(-4)}`;
     };
 
-    // Content components for each section
-    const NetworkContent = () => {
-        const [tradingData, setTradingData] = useState(null);
-        const [mintingData, setMintingData] = useState(null);
-        const [transactionData, setTransactionData] = useState(null);
-        const [error, setError] = useState(null);
-        const [lastUpdated, setLastUpdated] = useState(null);
-        const [isRefreshing, setIsRefreshing] = useState(false);
-        const [fieldUpdates, setFieldUpdates] = useState({
-            trading: {},
-            minting: {},
-            transaction: {}
-        });
+    // // Content components for each section
+    // const NetworkContent = () => {
+    //     const [tradingData, setTradingData] = useState(null);
+    //     const [mintingData, setMintingData] = useState(null);
+    //     const [transactionData, setTransactionData] = useState(null);
+    //     const [error, setError] = useState(null);
+    //     const [lastUpdated, setLastUpdated] = useState(null);
+    //     const [isRefreshing, setIsRefreshing] = useState(false);
+    //     const [fieldUpdates, setFieldUpdates] = useState({
+    //         trading: {},
+    //         minting: {},
+    //         transaction: {}
+    //     });
 
-        const fetchAllData = async () => {
-            setIsRefreshing(true);
-            try {
-                const [tradingResponse, mintingResponse, transactionResponse] = await Promise.all([
-                    fetch('http://localhost:8000/api/trading-activity'),
-                    fetch('http://localhost:8000/api/minting-dict'),
-                    fetch('http://localhost:8000/api/transaction-dict')
-                ]);
+    //     const fetchAllData = async () => {
+    //         setIsRefreshing(true);
+    //         try {
+    //             const [tradingResponse, mintingResponse, transactionResponse] = await Promise.all([
+    //                 fetch('http://localhost:8000/api/trading-activity'),
+    //                 fetch('http://localhost:8000/api/minting-dict'),
+    //                 fetch('http://localhost:8000/api/transaction-dict')
+    //             ]);
 
-                const tradingJson = await tradingResponse.json();
-                const mintingJson = await mintingResponse.json();
-                const transactionJson = await transactionResponse.json();
+    //             const tradingJson = await tradingResponse.json();
+    //             const mintingJson = await mintingResponse.json();
+    //             const transactionJson = await transactionResponse.json();
 
-                if (tradingJson.status === 'success') {
-                    checkFieldUpdates('trading', tradingData, tradingJson.data);
-                    setTradingData(tradingJson.data);
-                }
-                if (mintingJson.status === 'success') {
-                    checkFieldUpdates('minting', mintingData, mintingJson.data);
-                    setMintingData(mintingJson.data);
-                }
-                if (transactionJson.status === 'success') {
-                    checkFieldUpdates('transaction', transactionData, transactionJson.data);
-                    setTransactionData(transactionJson.data);
-                }
+    //             if (tradingJson.status === 'success') {
+    //                 checkFieldUpdates('trading', tradingData, tradingJson.data);
+    //                 setTradingData(tradingJson.data);
+    //             }
+    //             if (mintingJson.status === 'success') {
+    //                 checkFieldUpdates('minting', mintingData, mintingJson.data);
+    //                 setMintingData(mintingJson.data);
+    //             }
+    //             if (transactionJson.status === 'success') {
+    //                 checkFieldUpdates('transaction', transactionData, transactionJson.data);
+    //                 setTransactionData(transactionJson.data);
+    //             }
 
-                setLastUpdated(new Date().toLocaleTimeString());
-            } catch (err) {
-                setError('Failed to fetch network data');
-                console.error('Error:', err);
-            } finally {
-                // Keep the refresh animation visible for at least 500ms
-                setTimeout(() => setIsRefreshing(false), 500);
-            }
-        };
+    //             setLastUpdated(new Date().toLocaleTimeString());
+    //         } catch (err) {
+    //             setError('Failed to fetch network data');
+    //             console.error('Error:', err);
+    //         } finally {
+    //             // Keep the refresh animation visible for at least 500ms
+    //             setTimeout(() => setIsRefreshing(false), 500);
+    //         }
+    //     };
 
-        const checkFieldUpdates = (dataType, oldData, newData) => {
-            if (!oldData) return;
+    //     const checkFieldUpdates = (dataType, oldData, newData) => {
+    //         if (!oldData) return;
             
-            const updates = {};
-            Object.keys(newData).forEach(key => {
-                if (oldData[key] !== newData[key]) {
-                    updates[key] = true;
-                }
-            });
+    //         const updates = {};
+    //         Object.keys(newData).forEach(key => {
+    //             if (oldData[key] !== newData[key]) {
+    //                 updates[key] = true;
+    //             }
+    //         });
 
-            setFieldUpdates(prev => ({
-                ...prev,
-                [dataType]: updates
-            }));
+    //         setFieldUpdates(prev => ({
+    //             ...prev,
+    //             [dataType]: updates
+    //         }));
 
-            // Clear highlights after 1 second
-            setTimeout(() => {
-                setFieldUpdates(prev => ({
-                    ...prev,
-                    [dataType]: {}
-                }));
-            }, 1000);
-        };
+    //         // Clear highlights after 1 second
+    //         setTimeout(() => {
+    //             setFieldUpdates(prev => ({
+    //                 ...prev,
+    //                 [dataType]: {}
+    //             }));
+    //         }, 1000);
+    //     };
 
-        // Fetch data interval
-        useEffect(() => {
-            fetchAllData();
-            const intervalId = setInterval(fetchAllData, 5000);
-            return () => clearInterval(intervalId);
-        }, []);
+    //     // Fetch data interval
+    //     useEffect(() => {
+    //         fetchAllData();
+    //         const intervalId = setInterval(fetchAllData, 5000);
+    //         return () => clearInterval(intervalId);
+    //     }, []);
 
-        const DataTable = ({ title, data, dataType }) => {
-            if (!data) return null;
+    //     const DataTable = ({ title, data, dataType }) => {
+    //         if (!data) return null;
             
-            return (
-                <div className="data-section">
-                    <h3>{title}</h3>
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                {Object.keys(data).map(key => (
-                                    <th key={key}>{key}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                {Object.entries(data).map(([key, value]) => (
-                                    <td 
-                                        key={key}
-                                        className={fieldUpdates[dataType][key] ? 'field-updated' : ''}
-                                    >
-                                        {value}
-                                    </td>
-                                ))}
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            );
-        };
+    //         return (
+    //             <div className="data-section">
+    //                 <h3>{title}</h3>
+    //                 <table className="data-table">
+    //                     <thead>
+    //                         <tr>
+    //                             {Object.keys(data).map(key => (
+    //                                 <th key={key}>{key}</th>
+    //                             ))}
+    //                         </tr>
+    //                     </thead>
+    //                     <tbody>
+    //                         <tr>
+    //                             {Object.entries(data).map(([key, value]) => (
+    //                                 <td 
+    //                                     key={key}
+    //                                     className={fieldUpdates[dataType][key] ? 'field-updated' : ''}
+    //                                 >
+    //                                     {value}
+    //                                 </td>
+    //                             ))}
+    //                         </tr>
+    //                     </tbody>
+    //                 </table>
+    //             </div>
+    //         );
+    //     };
 
-        return (
-            <div className={`detail-section ${isRefreshing ? 'refreshing' : ''}`}>
-                <div className="section-header">
-                    <h2>Network Activity</h2>
-                    <div className="header-right">
-                        <FaSync className={`refresh-icon ${isRefreshing ? 'spinning' : ''}`} />
-                        <span className="last-updated">Last updated: {lastUpdated}</span>
-                    </div>
-                </div>
-                {error ? (
-                    <div className="error-message">{error}</div>
-                ) : (
-                    <>
-                        <DataTable title="Trading Activity" data={tradingData} dataType="trading" />
-                        <DataTable title="Minting Activity" data={mintingData} dataType="minting" />
-                        <DataTable title="Transaction Activity" data={transactionData} dataType="transaction" />
-                    </>
-                )}
-            </div>
-        );
-    };
+    //     return (
+    //         <div className={`detail-section ${isRefreshing ? 'refreshing' : ''}`}>
+    //             <div className="section-header">
+    //                 <h2>Network Activity</h2>
+    //                 <div className="header-right">
+    //                     <FaSync className={`refresh-icon ${isRefreshing ? 'spinning' : ''}`} />
+    //                     <span className="last-updated">Last updated: {lastUpdated}</span>
+    //                 </div>
+    //             </div>
+    //             {error ? (
+    //                 <div className="error-message">{error}</div>
+    //             ) : (
+    //                 <>
+    //                     <DataTable title="Trading Activity" data={tradingData} dataType="trading" />
+    //                     <DataTable title="Minting Activity" data={mintingData} dataType="minting" />
+    //                     <DataTable title="Transaction Activity" data={transactionData} dataType="transaction" />
+    //                 </>
+    //             )}
+    //         </div>
+    //     );
+    // };
 
     const SentimentContent = () => {
         const [newsItems, setNewsItems] = useState([]);
@@ -416,6 +417,77 @@ const Dashboard = () => {
         <>
             <Navbar handleLogout={handleLogout} />
             <div className="dashboard-container">
+
+                {/* Animated Background */}
+                <div className="animated-background">
+                    {/* Original circular blobs */}
+                    <div className="blob blob-1"></div>
+                    <div className="blob blob-2"></div>
+                    <div className="blob blob-3"></div>
+                    <div className="blob blob-4"></div>
+                    
+                    {/* New oval shapes - matching Solana site */}
+                    <div className="blob-oval blob-oval-horizontal" 
+                        style={{ 
+                            background: '#00FFA3',
+                            top: '15%', 
+                            left: '5%',
+                            animation: 'float-slow 20s ease-in-out infinite'
+                        }}>
+                    </div>
+                    
+                    <div className="blob-oval blob-oval-vertical" 
+                        style={{ 
+                            background: '#9945FF',
+                            bottom: '10%', 
+                            right: '8%',
+                            animation: 'float-medium 18s ease-in-out infinite'
+                        }}>
+                    </div>
+                    
+                    {/* Pill shape */}
+                    <div className="blob-oval blob-pill" 
+                        style={{ 
+                            background: '#E40F91',
+                            top: '70%', 
+                            left: '15%',
+                            animation: 'float-fast 15s ease-in-out infinite'
+                        }}>
+                    </div>
+                    
+                    {/* Small glowing circle */}
+                    <div className="blob-small-circle glow" 
+                        style={{ 
+                            background: '#00FFA3',
+                            top: '35%', 
+                            left: '60%',
+                            animation: 'pulse 8s ease-in-out infinite'
+                        }}>
+                    </div>
+                    
+                    {/* Ring shape */}
+                    <div className="blob-ring" 
+                        style={{ 
+                            borderColor: '#00FFA3',
+                            top: '20%', 
+                            right: '20%',
+                            animation: 'rotate-slow 30s linear infinite'
+                        }}>
+                    </div>
+                    
+                    {/* Small accent circle */}
+                    <div className="blob-small-circle" 
+                        style={{ 
+                            background: '#FFFFFF',
+                            bottom: '40%', 
+                            left: '48%',
+                            width: '4px',
+                            height: '4px',
+                            filter: 'blur(2px)',
+                            opacity: '0.7'
+                        }}>
+                    </div>
+                </div>
                 <div className="main-content">
                     <div className="cards-grid">
                         <Card
