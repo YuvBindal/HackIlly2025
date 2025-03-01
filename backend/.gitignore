@@ -33,3 +33,6 @@ typechain-types
 
 # Hardhat files
 cache
+
+# GitHub fetcher cache
+github_cache/
