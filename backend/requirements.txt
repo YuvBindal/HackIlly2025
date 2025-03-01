@@ -132,4 +132,15 @@ types-requests>=2.32.0
 attrs>=25.1.0
 
 # Configuration
-PyYAML>=6.0.0 
+PyYAML>=6.0.0
+
+# GitHub fetcher dependencies
+requests>=2.28.0
+PyGithub>=1.55.0
+
+# LLM analyzer dependencies
+python-dotenv>=0.19.0
+openai>=1.0.0
+
+# Utility dependencies
+pprint>=0.1 
