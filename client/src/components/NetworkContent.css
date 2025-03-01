@@ -480,3 +480,102 @@
         padding: 0.6rem;
     }
 }
+
+/* Chart Container Styles */
+.charts-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-bottom: 16px;
+}
+
+@media (min-width: 992px) {
+    .charts-container {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.chart-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+}
+
+.chart-section:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.chart-title {
+    font-size: 1.1rem;
+    margin: 0 0 12px 0;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+    background: linear-gradient(90deg, #00FFA3, #29C7FE);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.chart-wrapper {
+    height: 280px;
+    position: relative;
+}
+
+.chart-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Network Stats Grid */
+.network-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 8px;
+}
+
+@media (min-width: 768px) {
+    .network-stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.network-stat-item {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.network-stat-item:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    text-align: center;
+}

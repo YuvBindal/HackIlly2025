@@ -1,7 +1,31 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { FaSync, FaChevronDown, FaChevronUp, FaInfoCircle, FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { FaSync, FaChevronDown, FaChevronUp, FaInfoCircle, FaArrowUp, FaArrowDown, FaChartLine } from 'react-icons/fa';
 import { BiNetworkChart, BiCoin, BiTransfer } from 'react-icons/bi';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
 import './NetworkContent.css';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 const NetworkContent = () => {
     const [tradingData, setTradingData] = useState(null);
@@ -13,7 +37,9 @@ const NetworkContent = () => {
     const [expandedSections, setExpandedSections] = useState({
         trading: true,
         minting: true,
-        transaction: true
+        transaction: true,
+        networkStats: true,
+        charts: true
     });
     const [error, setError] = useState(null);
     const [lastUpdated, setLastUpdated] = useState(null);
@@ -29,17 +55,32 @@ const NetworkContent = () => {
         transaction: {}
     });
     
+    // Network stats state
+    const [networkStats, setNetworkStats] = useState({
+        tps: "2,450",
+        blockchain: "Loading...",
+        congestionLevel: "Loading...",
+        failurePercentage: "Loading..."
+    });
+    
+    // Chart data state
+    const [tpsHistory, setTpsHistory] = useState([]);
+    const [failureRateHistory, setFailureRateHistory] = useState([]);
+    const [timeLabels, setTimeLabels] = useState([]);
+    
     // Use refs to access current state values without triggering re-renders
     const tradingDataRef = useRef(null);
     const mintingDataRef = useRef(null);
     const transactionDataRef = useRef(null);
+    const networkStatsRef = useRef(null);
     
     // Update refs when state changes
     useEffect(() => {
         tradingDataRef.current = tradingData;
         mintingDataRef.current = mintingData;
         transactionDataRef.current = transactionData;
-    }, [tradingData, mintingData, transactionData]);
+        networkStatsRef.current = networkStats;
+    }, [tradingData, mintingData, transactionData, networkStats]);
 
     // Calculate trends when data changes
     useEffect(() => {
@@ -92,15 +133,19 @@ const NetworkContent = () => {
         
         setIsRefreshing(true);
         try {
-            const [tradingResponse, mintingResponse, transactionResponse] = await Promise.all([
+            const [tradingResponse, mintingResponse, transactionResponse, tpsResponse, congestionResponse] = await Promise.all([
                 fetch('http://localhost:8000/api/trading-activity'),
                 fetch('http://localhost:8000/api/minting-dict'),
-                fetch('http://localhost:8000/api/transaction-dict')
+                fetch('http://localhost:8000/api/transaction-dict'),
+                fetch("http://localhost:8000/api/transaction-fees"),
+                fetch("http://localhost:8000/api/get-predicted-congestion")
             ]);
 
             const tradingJson = await tradingResponse.json();
             const mintingJson = await mintingResponse.json();
             const transactionJson = await transactionResponse.json();
+            const tpsJson = await tpsResponse.json();
+            const congestionJson = await congestionResponse.json();
 
             if (tradingJson.status === 'success') {
                 checkFieldUpdates('trading', tradingDataRef.current, tradingJson.data);
@@ -115,13 +160,68 @@ const NetworkContent = () => {
                 setTransactionData(transactionJson.data);
             }
 
+            if (tpsJson.status === 'success') {
+                // Parse the TPS data
+                const parsedData = JSON.parse(tpsJson.data);
+                
+                // Get the last key (most recent data point)
+                const lastKey = Math.max(...Object.keys(parsedData.tps));
+                
+                // Update only the TPS field in networkStats
+                setNetworkStats(prev => ({
+                    ...prev,
+                    tps: parsedData.tps[lastKey] || '2,450',
+                    blockchain: parsedData.blockchain[lastKey] || 'Unknown'
+                }));
+                
+                // Update TPS history for charts
+                const tpsNumber = parseFloat(String(parsedData.tps[lastKey]).replace(/,/g, ''));
+                const currentTime = new Date().toLocaleTimeString();
+                
+                setTpsHistory(prev => {
+                    const newHistory = [...prev, tpsNumber];
+                    // Keep only the last 20 data points
+                    if (newHistory.length > 20) return newHistory.slice(-20);
+                    return newHistory;
+                });
+                
+                // Add corresponding time label
+                setTimeLabels(prev => {
+                    const newLabels = [...prev, currentTime];
+                    // Keep only the last 20 labels
+                    if (newLabels.length > 20) return newLabels.slice(-20);
+                    return newLabels;
+                });
+            }
+
+            // Handle congestion data
+            if (congestionJson.status === 'success' && congestionJson.data) {
+                // Update networkStats with congestion data
+                setNetworkStats(prev => ({
+                    ...prev,
+                    congestionLevel: congestionJson.data.congestion_level || 'Unknown',
+                    failurePercentage: congestionJson.data.failure_percentage + '%' || 'Unknown'
+                }));
+                
+                // Update failure rate history for charts
+                const failureRate = parseFloat(congestionJson.data.failure_percentage);
+                const currentTime = new Date().toLocaleTimeString();
+                
+                setFailureRateHistory(prev => {
+                    const newHistory = [...prev, failureRate];
+                    // Keep only the last 20 data points
+                    if (newHistory.length > 20) return newHistory.slice(-20);
+                    return newHistory;
+                });
+            }
+
             setLastUpdated(new Date().toLocaleTimeString());
         } catch (err) {
             setError('Failed to fetch network data');
             console.error('Error:', err);
         } finally {
             // Keep the refresh animation visible for at least 800ms
-            setTimeout(() => setIsRefreshing(false), 800);
+            setTimeout(() => setIsRefreshing(false), 1500);
         }
     }, [isRefreshing]); // Only depends on isRefreshing state to prevent concurrent fetches
 
@@ -155,13 +255,17 @@ const NetworkContent = () => {
         fetchAllData();
         
         // Set up interval for subsequent fetches
-        const intervalId = setInterval(() => {
+        const dataIntervalId = setInterval(() => {
             fetchAllData();
         }, 5000);
         
-        // Clean up interval on unmount
-        return () => clearInterval(intervalId);
-    }, []);
+   
+        
+        // Clean up intervals on unmount
+        return () => {
+            clearInterval(dataIntervalId);
+        };
+    }, [fetchAllData]);
 
     // Get a summary metric
     const getSummaryMetric = (data, key = null) => {
@@ -203,6 +307,17 @@ const NetworkContent = () => {
             color: '#9945FF'
         }
     ];
+
+    // Add a network stats card for TPS
+    const networkStatsCard = {
+        title: 'Network TPS',
+        value: networkStats ? networkStats.tps : '—',
+        icon: <BiNetworkChart />,
+        color: '#E40F91'
+    };
+
+    // Combine all cards
+    const allSummaryCards = [...summaryCards, networkStatsCard];
 
     const DataTable = ({ title, data, dataType, icon, color }) => {
         if (!data) return null;
@@ -270,6 +385,190 @@ const NetworkContent = () => {
         );
     };
 
+    // Network Stats Card
+    const NetworkStatsCard = () => {
+        return (
+            <div className="network-data-card">
+                <div 
+                    className="network-card-header" 
+                    onClick={() => toggleSection('networkStats')}
+                >
+                    <div className="network-card-title">
+                        <div className="network-card-icon" style={{ background: `rgba(228, 15, 145, 0.2)` }}>
+                            <BiNetworkChart />
+                        </div>
+                        <h3>Network Performance</h3>
+                    </div>
+                    <div className="network-card-toggle">
+                        {expandedSections.networkStats ? <FaChevronUp /> : <FaChevronDown />}
+                    </div>
+                </div>
+                
+                {expandedSections.networkStats && (
+                    <div className="network-card-content">
+                        <div className="network-stats-grid">
+                            <div className="network-stat-item">
+                                <div className="stat-label">Current TPS</div>
+                                <div className="stat-value">{networkStats.tps}</div>
+                            </div>
+                            <div className="network-stat-item">
+                                <div className="stat-label">Blockchain</div>
+                                <div className="stat-value">{networkStats.blockchain}</div>
+                            </div>
+                            <div className="network-stat-item">
+                                <div className="stat-label">Congestion Level</div>
+                                <div className="stat-value">{networkStats.congestionLevel}</div>
+                            </div>
+                            <div className="network-stat-item">
+                                <div className="stat-label">Failure Rate</div>
+                                <div className="stat-value">{networkStats.failurePercentage}</div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    // Network Charts Card for time series visualization
+    const NetworkChartsCard = () => {
+        // Chart data configuration
+        const tpsChartData = {
+            labels: timeLabels,
+            datasets: [
+                {
+                    label: 'TPS (Transactions Per Second)',
+                    data: tpsHistory,
+                    fill: true,
+                    backgroundColor: 'rgba(0, 255, 163, 0.2)',
+                    borderColor: '#00FFA3',
+                    tension: 0.4,
+                    pointBackgroundColor: '#00FFA3',
+                    pointRadius: 3,
+                    pointHoverRadius: 6,
+                }
+            ]
+        };
+
+        const failureRateChartData = {
+            labels: timeLabels,
+            datasets: [
+                {
+                    label: 'Failure Rate (%)',
+                    data: failureRateHistory,
+                    fill: true,
+                    backgroundColor: 'rgba(228, 15, 145, 0.2)',
+                    borderColor: '#E40F91',
+                    tension: 0.4,
+                    pointBackgroundColor: '#E40F91',
+                    pointRadius: 3,
+                    pointHoverRadius: 6,
+                }
+            ]
+        };
+
+        // Common chart options
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderWidth: 1,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
+            },
+            animation: {
+                duration: 750
+            }
+        };
+
+        return (
+            <div className="network-data-card">
+                <div 
+                    className="network-card-header" 
+                    onClick={() => toggleSection('charts')}
+                >
+                    <div className="network-card-title">
+                        <div className="network-card-icon" style={{ background: `rgba(41, 199, 254, 0.2)` }}>
+                            <FaChartLine />
+                        </div>
+                        <h3>Network Trends</h3>
+                    </div>
+                    <div className="network-card-toggle">
+                        {expandedSections.charts ? <FaChevronUp /> : <FaChevronDown />}
+                    </div>
+                </div>
+                
+                {expandedSections.charts && (
+                    <div className="network-card-content">
+                        <div className="charts-container">
+                            <div className="chart-section">
+                                <h4 className="chart-title">TPS Over Time</h4>
+                                <div className="chart-wrapper">
+                                    {tpsHistory.length > 1 ? (
+                                        <Line data={tpsChartData} options={chartOptions} />
+                                    ) : (
+                                        <div className="chart-placeholder">
+                                            <p>Collecting data... Charts will appear after multiple data points are available.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            <div className="chart-section">
+                                <h4 className="chart-title">Failure Rate Over Time</h4>
+                                <div className="chart-wrapper">
+                                    {failureRateHistory.length > 1 ? (
+                                        <Line data={failureRateChartData} options={chartOptions} />
+                                    ) : (
+                                        <div className="chart-placeholder">
+                                            <p>Collecting data... Charts will appear after multiple data points are available.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     return (
         <div className={`network-content-wrapper ${isRefreshing ? 'refreshing' : ''}`}>
             <div className="section-header">
@@ -297,7 +596,7 @@ const NetworkContent = () => {
 
             {/* Summary Cards */}
             <div className="network-summary-cards">
-                {summaryCards.map((card, index) => (
+                {allSummaryCards.map((card, index) => (
                     <div className="summary-card" key={index} style={{ '--card-accent': card.color }}>
                         <div className="summary-icon">{card.icon}</div>
                         <div className="summary-content">
@@ -328,6 +627,13 @@ const NetworkContent = () => {
                     </div>
                 ) : (
                     <>
+                        {/* Network Stats Card */}
+                        <NetworkStatsCard />
+                        
+                        {/* Network Charts Card - NEW */}
+                        <NetworkChartsCard />
+                        
+                        {/* Data Tables */}
                         <DataTable 
                             title="Trading Activity" 
                             data={tradingData} 

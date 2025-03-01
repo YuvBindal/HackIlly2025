@@ -95,7 +95,7 @@ const Card = ({ type, isActive, onClick }) => {
 
         fetchNetworkStats();
         const intervalId = type === 'network' ? 
-            setInterval(fetchNetworkStats, 30000) : null;
+            setInterval(fetchNetworkStats, 5000) : null;
 
         return () => {
             if (intervalId) clearInterval(intervalId);

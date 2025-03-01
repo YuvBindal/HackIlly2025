@@ -193,6 +193,40 @@ async def get_all_metrics():
 async def root():
     return {"message": "Welcome to the Network Congestion API"}
 
+@app.get('/api/get-predicted-congestion')
+async def get_predicted_congestion():
+    try:
+        congestion_history_path = './metrics_cache/congestion_history.csv'
+        
+        # Check if file exists
+        if not Path(congestion_history_path).exists():
+            return {
+                "status": "error",
+                "message": "Congestion history file not found"
+            }
+            
+        # Read the CSV and get the last row
+        congestion_df = pd.read_csv(congestion_history_path)
+        
+        if congestion_df.empty:
+            return {
+                "status": "error",
+                "message": "Congestion history file is empty"
+            }
+            
+        # Get the last row as a dictionary
+        last_row = congestion_df.tail(1).to_dict(orient='records')[0]
+        
+        return {
+            'status': 'success',
+            'data': last_row
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
 @app.get('/api/predict-congestion')
 async def predict_congestion():
     try:
@@ -202,6 +236,7 @@ async def predict_congestion():
         
         tps_path = f'./metrics_cache/{tps_query_id}.csv'
         tx_path = f'./metrics_cache/{tx_query_id}.csv'
+        congestion_history_path = './metrics_cache/congestion_history.csv'
         
         # Check if files exist
         if not Path(tps_path).exists() or not Path(tx_path).exists():
@@ -240,25 +275,53 @@ async def predict_congestion():
         numerator = min(prediction,input_data['tx_count'])
         failure_percentage = int((numerator/denominator) * 100)
         print(failure_percentage)
+        
+        # Add some randomness to the failure percentage for visual interest
+        final_failure_percentage = max(0, random.randint(0+failure_percentage, 20+failure_percentage))
+        
         congestion_level = ""
-        if failure_percentage >= 0 and failure_percentage < 20:
+        if final_failure_percentage >= 0 and final_failure_percentage < 20:
             congestion_level = 'Very Low Congestion'
-        elif failure_percentage >= 20 and failure_percentage < 40:
+        elif final_failure_percentage >= 20 and final_failure_percentage < 40:
             congestion_level = "Low Congestion"
-        elif failure_percentage >= 40 and failure_percentage < 60:
+        elif final_failure_percentage >= 40 and final_failure_percentage < 60:
             congestion_level = "Somewhat Congested"
-        elif failure_percentage >= 60 and failure_percentage < 80:
+        elif final_failure_percentage >= 60 and final_failure_percentage < 80:
             congestion_level = "Congested"
         else:
             congestion_level = "Highly Congested, try again later!"
         
+        # Get current timestamp
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Save the congestion data to CSV
+        congestion_data = {
+            'timestamp': current_time,
+            'failure_percentage': final_failure_percentage,
+            'congestion_level': congestion_level,
+            'tps': input_data['tps'],
+            'tx_count': input_data['tx_count']
+        }
+        
+        # Check if congestion history file exists
+        if Path(congestion_history_path).exists():
+            # Append to existing file
+            congestion_df = pd.read_csv(congestion_history_path)
+            congestion_df = pd.concat([congestion_df, pd.DataFrame([congestion_data])], ignore_index=True)
+        else:
+            # Create new file
+            congestion_df = pd.DataFrame([congestion_data])
+        
+        # Save to CSV
+        congestion_df.to_csv(congestion_history_path, index=False)
+        
         return {
             "status": "success",
             "data": {
-                "Failure Percentage": max(0, random.randint(0+failure_percentage,20+failure_percentage)),
+                "Failure Percentage": final_failure_percentage,
                 "Predicted Congestion": congestion_level,
                 "current_metrics": input_data,
-                "timestamp": tps_data.get('timestamp', None)  # Include timestamp if available
+                "timestamp": current_time
             }
         }
     except Exception as e:

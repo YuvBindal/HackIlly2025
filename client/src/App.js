@@ -1,3 +1,4 @@
+// App.js
 import { PrivyProvider } from "@privy-io/react-auth";
 import React from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
