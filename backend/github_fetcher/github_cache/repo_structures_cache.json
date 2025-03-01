@@ -1,0 +1,413 @@
+{
+  "complete_structure_https://github.com/solana-developers/CRUD-dApp": {
+    "timestamp": 1740863585.315454,
+    "data": {
+      "README.md": {
+        "path": "README.md",
+        "type": "file",
+        "category": null,
+        "is_sensitive": false
+      },
+      "anchor": {
+        ".eslintrc.json": {
+          "path": "anchor/.eslintrc.json",
+          "type": "file",
+          "category": null,
+          "is_sensitive": false
+        },
+        ".swcrc": {
+          "path": "anchor/.swcrc",
+          "type": "file",
+          "category": null,
+          "is_sensitive": false
+        },
+        "Anchor.toml": {
+          "path": "anchor/Anchor.toml",
+          "type": "file",
+          "category": "program",
+          "is_sensitive": false
+        },
+        "Cargo.lock": {
+          "path": "anchor/Cargo.lock",
+          "type": "file",
+          "category": null,
+          "is_sensitive": false
+        },
+        "Cargo.toml": {
+          "path": "anchor/Cargo.toml",
+          "type": "file",
+          "category": "program",
+          "is_sensitive": false
+        },
+        "README.md": {
+          "path": "anchor/README.md",
+          "type": "file",
+          "category": null,
+          "is_sensitive": false
+        },
+        "jest.config.ts": {
+          "path": "anchor/jest.config.ts",
+          "type": "file",
+          "category": "client",
+          "is_sensitive": false
+        },
+        "migrations": {
+          "deploy.ts": {
+            "path": "anchor/migrations/deploy.ts",
+            "type": "file",
+            "category": "client",
+            "is_sensitive": false
+          }
+        },
+        "package-lock.json": {
+          "path": "anchor/package-lock.json",
+          "type": "file",
+          "category": null,
+          "is_sensitive": false
+        },
+        "package.json": {
+          "path": "anchor/package.json",
+          "type": "file",
+          "category": "client",
+          "is_sensitive": false
+        },
+        "programs": {
+          "journal": {
+            "Cargo.toml": {
+              "path": "anchor/programs/journal/Cargo.toml",
+              "type": "file",
+              "category": "program",
+              "is_sensitive": false
+            },
+            "Xargo.toml": {
+              "path": "anchor/programs/journal/Xargo.toml",
+              "type": "file",
+              "category": "program",
+              "is_sensitive": false
+            },
+            "src": {
+              "lib.rs": {
+                "path": "anchor/programs/journal/src/lib.rs",
+                "type": "file",
+                "category": "program",
+                "is_sensitive": false
+              }
+            }
+          }
+        },
+        "project.json": {
+          "path": "anchor/project.json",
+          "type": "file",
+          "category": null,
+          "is_sensitive": false
+        },
+        "src": {
+          "index.ts": {
+            "path": "anchor/src/index.ts",
+            "type": "file",
+            "category": "client",
+            "is_sensitive": false
+          },
+          "journal-exports.ts": {
+            "path": "anchor/src/journal-exports.ts",
+            "type": "file",
+            "category": "client",
+            "is_sensitive": false
+          }
+        },
+        "tests": {
+          "journal.spec.ts": {
+            "path": "anchor/tests/journal.spec.ts",
+            "type": "file",
+            "category": "client",
+            "is_sensitive": false
+          }
+        },
+        "tsconfig.json": {
+          "path": "anchor/tsconfig.json",
+          "type": "file",
+          "category": "client",
+          "is_sensitive": false
+        },
+        "tsconfig.lib.json": {
+          "path": "anchor/tsconfig.lib.json",
+          "type": "file",
+          "category": null,
+          "is_sensitive": false
+        },
+        "tsconfig.spec.json": {
+          "path": "anchor/tsconfig.spec.json",
+          "type": "file",
+          "category": null,
+          "is_sensitive": false
+        }
+      },
+      "jest.config.ts": {
+        "path": "jest.config.ts",
+        "type": "file",
+        "category": "client",
+        "is_sensitive": false
+      },
+      "jest.preset.js": {
+        "path": "jest.preset.js",
+        "type": "file",
+        "category": "client",
+        "is_sensitive": false
+      },
+      "nx.json": {
+        "path": "nx.json",
+        "type": "file",
+        "category": null,
+        "is_sensitive": false
+      },
+      "package-lock.json": {
+        "path": "package-lock.json",
+        "type": "file",
+        "category": null,
+        "is_sensitive": false
+      },
+      "package.json": {
+        "path": "package.json",
+        "type": "file",
+        "category": "client",
+        "is_sensitive": false
+      },
+      "tsconfig.base.json": {
+        "path": "tsconfig.base.json",
+        "type": "file",
+        "category": null,
+        "is_sensitive": false
+      },
+      "vercel.json": {
+        "path": "vercel.json",
+        "type": "file",
+        "category": null,
+        "is_sensitive": false
+      },
+      "web": {
+        ".eslintrc.json": {
+          "path": "web/.eslintrc.json",
+          "type": "file",
+          "category": null,
+          "is_sensitive": false
+        },
+        "app": {
+          "account": {
+            "[address]": {
+              "page.tsx": {
+                "path": "web/app/account/[address]/page.tsx",
+                "type": "file",
+                "category": null,
+                "is_sensitive": false
+              }
+            },
+            "page.tsx": {
+              "path": "web/app/account/page.tsx",
+              "type": "file",
+              "category": null,
+              "is_sensitive": false
+            }
+          },
+          "api": {
+            "hello": {
+              "route.ts": {
+                "path": "web/app/api/hello/route.ts",
+                "type": "file",
+                "category": "client",
+                "is_sensitive": false
+              }
+            }
+          },
+          "clusters": {
+            "page.tsx": {
+              "path": "web/app/clusters/page.tsx",
+              "type": "file",
+              "category": null,
+              "is_sensitive": false
+            }
+          },
+          "global.css": {
+            "path": "web/app/global.css",
+            "type": "file",
+            "category": null,
+            "is_sensitive": false
+          },
+          "journal": {
+            "page.tsx": {
+              "path": "web/app/journal/page.tsx",
+              "type": "file",
+              "category": null,
+              "is_sensitive": false
+            }
+          },
+          "layout.tsx": {
+            "path": "web/app/layout.tsx",
+            "type": "file",
+            "category": null,
+            "is_sensitive": false
+          },
+          "page.module.css": {
+            "path": "web/app/page.module.css",
+            "type": "file",
+            "category": null,
+            "is_sensitive": false
+          },
+          "page.tsx": {
+            "path": "web/app/page.tsx",
+            "type": "file",
+            "category": null,
+            "is_sensitive": false
+          },
+          "react-query-provider.tsx": {
+            "path": "web/app/react-query-provider.tsx",
+            "type": "file",
+            "category": null,
+            "is_sensitive": false
+          }
+        },
+        "components": {
+          "account": {
+            "account-data-access.tsx": {
+              "path": "web/components/account/account-data-access.tsx",
+              "type": "file",
+              "category": null,
+              "is_sensitive": false
+            },
+            "account-detail-feature.tsx": {
+              "path": "web/components/account/account-detail-feature.tsx",
+              "type": "file",
+              "category": null,
+              "is_sensitive": false
+            },
+            "account-list-feature.tsx": {
+              "path": "web/components/account/account-list-feature.tsx",
+              "type": "file",
+              "category": null,
+              "is_sensitive": false
+            },
+            "account-ui.tsx": {
+              "path": "web/components/account/account-ui.tsx",
+              "type": "file",
+              "category": null,
+              "is_sensitive": false
+            }
+          },
+          "cluster": {
+            "cluster-data-access.tsx": {
+              "path": "web/components/cluster/cluster-data-access.tsx",
+              "type": "file",
+              "category": null,
+              "is_sensitive": false
+            },
+            "cluster-feature.tsx": {
+              "path": "web/components/cluster/cluster-feature.tsx",
+              "type": "file",
+              "category": null,
+              "is_sensitive": false
+            },
+            "cluster-ui.tsx": {
+              "path": "web/components/cluster/cluster-ui.tsx",
+              "type": "file",
+              "category": null,
+              "is_sensitive": false
+            }
+          },
+          "dashboard": {
+            "dashboard-feature.tsx": {
+              "path": "web/components/dashboard/dashboard-feature.tsx",
+              "type": "file",
+              "category": null,
+              "is_sensitive": false
+            }
+          },
+          "journal": {
+            "journal-data-access.tsx": {
+              "path": "web/components/journal/journal-data-access.tsx",
+              "type": "file",
+              "category": null,
+              "is_sensitive": false
+            },
+            "journal-feature.tsx": {
+              "path": "web/components/journal/journal-feature.tsx",
+              "type": "file",
+              "category": null,
+              "is_sensitive": false
+            },
+            "journal-ui.tsx": {
+              "path": "web/components/journal/journal-ui.tsx",
+              "type": "file",
+              "category": null,
+              "is_sensitive": false
+            }
+          },
+          "solana": {
+            "solana-provider.tsx": {
+              "path": "web/components/solana/solana-provider.tsx",
+              "type": "file",
+              "category": null,
+              "is_sensitive": false
+            }
+          },
+          "ui": {
+            "ui-layout.tsx": {
+              "path": "web/components/ui/ui-layout.tsx",
+              "type": "file",
+              "category": null,
+              "is_sensitive": false
+            }
+          }
+        },
+        "index.d.ts": {
+          "path": "web/index.d.ts",
+          "type": "file",
+          "category": "client",
+          "is_sensitive": false
+        },
+        "next-env.d.ts": {
+          "path": "web/next-env.d.ts",
+          "type": "file",
+          "category": "client",
+          "is_sensitive": false
+        },
+        "next.config.js": {
+          "path": "web/next.config.js",
+          "type": "file",
+          "category": "client",
+          "is_sensitive": false
+        },
+        "postcss.config.js": {
+          "path": "web/postcss.config.js",
+          "type": "file",
+          "category": "client",
+          "is_sensitive": false
+        },
+        "project.json": {
+          "path": "web/project.json",
+          "type": "file",
+          "category": null,
+          "is_sensitive": false
+        },
+        "public": {
+          ".gitkeep": {
+            "path": "web/public/.gitkeep",
+            "type": "file",
+            "category": null,
+            "is_sensitive": false
+          }
+        },
+        "tailwind.config.js": {
+          "path": "web/tailwind.config.js",
+          "type": "file",
+          "category": "client",
+          "is_sensitive": false
+        },
+        "tsconfig.json": {
+          "path": "web/tsconfig.json",
+          "type": "file",
+          "category": "client",
+          "is_sensitive": false
+        }
+      }
+    }
+  }
+}
