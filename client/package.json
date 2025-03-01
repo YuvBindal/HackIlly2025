@@ -6,6 +6,8 @@
     "@privy-io/react-auth": "^2.4.2",
     "@react-three/drei": "^10.0.3",
     "@react-three/fiber": "^9.0.4",
+    "@solana/web3.js": "^1.98.0",
+    "bn.js": "^5.2.1",
     "chart.js": "^4.4.8",
     "cra-template": "1.2.0",
     "react": "^18.2.0",
@@ -15,7 +17,14 @@
     "react-router-dom": "^6.22.3",
     "react-scripts": "5.0.1",
     "three": "^0.174.0",
-    "web-vitals": "^4.2.4"
+    "web-vitals": "^4.2.4",
+    "ws": "^8.18.1"
+  },
+  "resolutions": {
+    "bn.js": "^5.2.1",
+    "**/bn.js": "^5.2.1",
+    "@ethersproject/bignumber/bn.js": "^5.2.1",
+    "@ethersproject/signing-key/bn.js": "^5.2.1"
   },
   "scripts": {
     "start": "react-scripts start",

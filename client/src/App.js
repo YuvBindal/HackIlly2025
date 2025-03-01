@@ -5,6 +5,7 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
 import Dashboard from "./pages/Dashboard";
 import Signup from "./pages/Signup";
+import EnhancedSolanaWallet from "./pages/Scheduler";
 
 function App() {
     return (
@@ -23,6 +24,8 @@ function App() {
                     <Routes>
                         <Route path="/" element={<Signup />} />
                         <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/scheduler" element={<EnhancedSolanaWallet />} />
+
                     </Routes>
                 </div>
             </Router>
