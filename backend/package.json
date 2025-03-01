@@ -1,0 +1,27 @@
+{
+  "name": "sepolia",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ sepolia",
+    "create-local": "graph create --node http://localhost:8020/ sepolia",
+    "remove-local": "graph remove --node http://localhost:8020/ sepolia",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 sepolia",
+    "test": "graph test"
+  },
+  "dependencies": {
+    "@coinbase/agentkit": "^0.1.1",
+    "@coinbase/agentkit-langchain": "^0.1.0",
+    "@graphprotocol/graph-cli": "0.95.0",
+    "@graphprotocol/graph-ts": "0.36.0",
+    "@langchain/core": "^0.3.38",
+    "@langchain/langgraph": "^0.2.45",
+    "@langchain/openai": "^0.4.2",
+    "viem": "^2.22.22"
+  },
+  "devDependencies": {
+    "matchstick-as": "0.6.0",
+    "ts-node": "^10.9.2"
+  }
+}

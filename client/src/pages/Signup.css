@@ -1,0 +1,292 @@
+.signup-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    font-family: 'Inter', sans-serif;
+    background: #1e2738 url('../assets/logo_circle.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    overflow: hidden;
+}
+
+.signup-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(30, 39, 56, 0.4) 20%,
+            rgba(30, 39, 56, 0.65) 60%,
+            rgba(0, 0, 0, 0.8) 100%);
+    z-index: 1;
+}
+
+/* Additional gradient for more depth */
+.signup-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 30%,
+            rgba(0, 0, 0, 0.3) 85%,
+            rgba(0, 0, 0, 0.6) 100%);
+    z-index: 1;
+}
+
+.auth-section {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    max-width: 450px;
+    margin: 2rem auto;
+    position: relative;
+    z-index: 2;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.auth-section:hover {
+    transform: translateY(-15px) scale(1.05);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.17);
+}
+
+.welcome-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    position: relative;
+}
+
+.welcome-header h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 1rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    text-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.welcome-header h1:hover {
+    transform: translateY(-2px);
+    text-shadow: 0 0 30px rgba(99, 102, 241, 0.6);
+}
+
+.welcome-header h1::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #6366f1, #06b6d4);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.welcome-header h1:hover::after {
+    width: 100px;
+}
+
+.welcome-header h4 {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    max-width: 400px;
+    margin: 1.5rem auto 0;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+}
+
+.welcome-header p {
+    color: #64748b;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    max-width: 400px;
+    margin: 1.5rem auto 0;
+    background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 500;
+}
+
+.auth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-top: 2.5rem;
+}
+
+.auth-button {
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.wallet-button {
+    background: #4F46E5;
+    color: white;
+    box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+}
+
+.wallet-button:hover {
+    background: #4338ca;
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 20px rgba(79, 70, 229, 0.4);
+}
+
+.email-button {
+    background: rgba(255, 255, 255, 0.05);
+    color: #e2e8f0;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.email-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #6366f1;
+    color: #6366f1;
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Profile Section Styles */
+.profile-section {
+    background: white;
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.profile-header {
+    margin-bottom: 2.5rem;
+}
+
+.wallet-address {
+    background: #f1f5f9;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 1.5rem 0;
+    font-size: 1.1rem;
+    color: #334155;
+    letter-spacing: 0.025em;
+}
+
+.notification-prefs {
+    margin-top: 3rem;
+    text-align: left;
+    background: #f8fafc;
+    padding: 2rem;
+    border-radius: 16px;
+}
+
+.pref-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.25rem 0;
+    padding: 0.75rem;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.pref-option:hover {
+    background: #f1f5f9;
+}
+
+.pref-option input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 4px;
+    border: 2px solid #4F46E5;
+    cursor: pointer;
+}
+
+.pref-option label {
+    font-size: 1.1rem;
+    color: #334155;
+    cursor: pointer;
+}
+
+.recent-activity {
+    margin-top: 3rem;
+    text-align: left;
+}
+
+.activity-item {
+    padding: 1.25rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin: 0.75rem 0;
+    transition: all 0.2s ease;
+}
+
+.activity-item:hover {
+    background: #f8fafc;
+    border-color: #4F46E5;
+}
+
+.logout-button {
+    background: #ef4444;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 3rem;
+    box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+}
+
+.logout-button:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(239, 68, 68, 0.3);
+}
+
+@media (max-width: 640px) {
+    .auth-section {
+        padding: 2rem;
+        margin: 1rem;
+    }
+
+    .welcome-header h1 {
+        font-size: 2rem;
+    }
+
+    .auth-button {
+        padding: 1rem;
+    }
+}
