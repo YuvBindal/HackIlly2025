@@ -1,11 +1,10 @@
 import os
-import pandas as pd
+import time
 from datetime import datetime, timedelta
-import requests
-import time
 from functools import reduce
+
 import pandas as pd
-import time
+import requests
 
 #Using this to get -> Failed Transactions and Fees data on Solana
 
@@ -46,7 +45,7 @@ class DuneAnalytics:
 
 def analyze_transaction_fees(query_id=4688078):
     # Initialize Dune Analytics client
-    api_key = "JZgaVTEnvtMDKlLEq0dmEzu9ssADwVAt"
+    api_key = "fGgq2c7rz24Gev32VY3wdctdo1tQNIro"
     dune = DuneAnalytics(api_key)
 
     # Let's use a query that gets transaction fee data for the last hour

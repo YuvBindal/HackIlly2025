@@ -1,12 +1,14 @@
-import requests
-import json
-import time
 import csv
-from datetime import datetime, timedelta, timezone
+import json
 import os
-from dotenv import load_dotenv
+import time
+from datetime import datetime, timedelta, timezone
+
 import pandas as pd
-env_path = os.path.join(os.path.dirname(__file__), '../../../sepolia/.env.local')
+import requests
+from dotenv import load_dotenv
+
+env_path = os.path.join(os.path.dirname(__file__), '../../../backend/.env.local')
 load_dotenv(env_path)
 
 
