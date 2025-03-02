@@ -548,21 +548,216 @@ MOCK_SECURITY_ISSUES = [
 
 @app.post('/api/validate-program')
 async def validate_program_id(request: ProgramIdRequest = Body(...)):
+    import requests
+    from backend.github_fetcher.github_fetcher import GitHubFetcher
+    from backend.llm_analyzer.security_analyzer import SolanaSecurityAnalyzer
+    
     program_id = request.programId
+    
+    try:
+        # Step 1: Verify the program ID with osec.io
+        verification_url = f"https://verify.osec.io/status/{program_id}"
+        verification_response = requests.get(verification_url)
+        
+        if verification_response.status_code != 200:
+            return {
+                "status": "error",
+                "validated": False,
+                "RepoStructure": ""
+            }
+        
+        verification_data = verification_response.json()
+        is_verified = verification_data.get("is_verified", False)
+        
+        if not is_verified:
+            return {
+                "status": "error",
+                "validated": False,
+                "RepoStructure": ""
+            }
+        
+        # Step 2: Get the repository URL from the verification response
+        repo_url = verification_data.get("repo_url")
+        if not repo_url:
+            return {
+                "status": "error",
+                "validated": False,
+                "message": "Repository URL not found in verification data",
+                "RepoStructure": ""
+            }
+        
+        # Step 3: Initialize the GitHub fetcher and get the repository structure
+        github_fetcher = GitHubFetcher()
+        repo_structure = github_fetcher.get_complete_repository_structure(repo_url)
+        
+        # Step 4: Generate descriptions for each file using LLM
+        analyzer = SolanaSecurityAnalyzer(llm_provider="openai", model_name="gpt-4o-mini")
+        enhanced_structure = await generate_file_descriptions(repo_structure, analyzer, repo_url)
+        
+        return {
+            "status": "success",
+            "validated": True,
+            "RepoStructure": json.dumps(enhanced_structure, indent=2)
+        }
+        
+    except Exception as e:
+        print(f"Error validating program ID: {str(e)}")
+        return {
+            "status": "error",
+            "validated": False,
+            "message": str(e),
+            "RepoStructure": ""
+        }
 
-    # For testing purposes, some program IDs will be "valid" and others "invalid"
-    # You could implement specific logic based on program ID formats if needed
-    is_valid = len(program_id) > 5 and not program_id.startswith("invalid")
+async def generate_file_descriptions(repo_structure, analyzer, repo_url):
+    """
+    Generate brief descriptions for each file in the repository structure using LLM.
+    
+    Args:
+        repo_structure (dict): The repository structure from GitHubFetcher
+        analyzer (SolanaSecurityAnalyzer): The analyzer with LLM capabilities
+        repo_url (str): The repository URL
+        
+    Returns:
+        dict: Enhanced repository structure with descriptions
+    """
+    # Create a simplified version of the structure for the LLM prompt
+    simplified_structure = json.dumps(repo_structure, indent=2)
+    
+    # Prepare the prompt for the LLM
+    description_prompt = f"""
+You are a Solana blockchain expert. I need brief descriptions for files in a Solana repository.
 
-    # Select repo structure based on program ID or use default
-    repo_structure = MOCK_REPO_STRUCTURES.get(program_id, MOCK_REPO_STRUCTURES["default"])
+Repository URL: {repo_url}
 
-    # Return mock response
-    return {
-        "status": "success" if is_valid else "error",
-        "validated": is_valid,
-        "RepoStructure": json.dumps(repo_structure, indent=2) if is_valid else ""
-    }
+Below is the repository structure:
+{simplified_structure}
+
+For each file in this structure, provide a brief (5-10 word) description of what the file likely contains or does based on its name and location.
+Format your response as a JSON object with the same structure, but replace each file path with a brief description.
+
+For example, if the input is:
+{{
+  "src": {{
+    "lib.rs": {{
+      "path": "src/lib.rs",
+      "type": "file"
+    }}
+  }}
+}}
+
+Your response should be:
+{{
+  "src": {{
+    "lib.rs": "Main program entry point and logic"
+  }}
+}}
+
+Only include files, not metadata like "path" or "type". Keep the same nested structure.
+"""
+    
+    # Call the LLM API
+    llm_response = analyzer._call_llm_api(description_prompt)
+    
+    # Extract the JSON from the response
+    import re
+    json_match = re.search(r'```json\s*(.*?)\s*```', llm_response, re.DOTALL)
+    
+    if json_match:
+        try:
+            enhanced_structure = json.loads(json_match.group(1))
+            return enhanced_structure
+        except json.JSONDecodeError:
+            pass
+    
+    # If we couldn't parse the JSON or no JSON was found, try to extract it without code blocks
+    try:
+        # Find the first { and the last }
+        start_idx = llm_response.find('{')
+        end_idx = llm_response.rfind('}')
+        
+        if start_idx != -1 and end_idx != -1:
+            json_str = llm_response[start_idx:end_idx+1]
+            enhanced_structure = json.loads(json_str)
+            return enhanced_structure
+    except (json.JSONDecodeError, ValueError):
+        pass
+    
+    # If all else fails, create a simple description based on file extensions
+    return create_fallback_descriptions(repo_structure)
+
+def create_fallback_descriptions(repo_structure):
+    """
+    Create simple descriptions for files based on their extensions and names.
+    This is a fallback method when LLM-based description generation fails.
+    
+    Args:
+        repo_structure (dict): The repository structure from GitHubFetcher
+        
+    Returns:
+        dict: Repository structure with basic descriptions
+    """
+    def process_structure(structure):
+        result = {}
+        for key, value in structure.items():
+            if isinstance(value, dict):
+                if "type" in value and value["type"] == "file":
+                    # This is a file entry
+                    result[key] = generate_basic_description(key)
+                else:
+                    # This is a directory or nested structure
+                    result[key] = process_structure(value)
+            else:
+                # Unexpected format, just keep as is
+                result[key] = value
+        return result
+    
+    def generate_basic_description(filename):
+        """Generate a basic description based on filename and extension"""
+        ext = filename.split('.')[-1].lower() if '.' in filename else ''
+        
+        # Common Solana/Rust file descriptions
+        if filename == "lib.rs":
+            return "Main program entry point"
+        elif filename == "Cargo.toml":
+            return "Rust package configuration"
+        elif filename == "Anchor.toml":
+            return "Anchor framework configuration"
+        elif filename == "Xargo.toml":
+            return "Solana program configuration"
+        elif filename == "package.json":
+            return "JavaScript/TypeScript package configuration"
+        elif filename == "tsconfig.json":
+            return "TypeScript configuration"
+        
+        # Extension-based descriptions
+        if ext == "rs":
+            if "test" in filename:
+                return "Rust test file"
+            else:
+                return "Rust source code"
+        elif ext == "ts":
+            if "test" in filename:
+                return "TypeScript test file"
+            else:
+                return "TypeScript source code"
+        elif ext == "js":
+            if "test" in filename:
+                return "JavaScript test file"
+            else:
+                return "JavaScript source code"
+        elif ext == "json":
+            return "JSON configuration file"
+        elif ext == "md":
+            return "Documentation file"
+        elif ext == "gitignore":
+            return "Git ignore rules"
+        elif ext == "env":
+            return "Environment variables"
+        else:
+            return f"{filename} file"
+    
+    return process_structure(repo_structure)
 
 @app.post('/api/scan')
 async def scan_code(request: ScanRequest = Body(...)):
