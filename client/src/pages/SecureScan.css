@@ -383,13 +383,44 @@
   }
   
   .repo-structure {
-    margin-top: 1.2rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    background: rgba(8, 8, 20, 0.4);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(153, 69, 255, 0.2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   }
   
   .repo-structure h4 {
-    margin-bottom: 0.8rem;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(153, 69, 255, 0.2);
+    color: white;
+    font-size: 1.2rem;
+  }
+  
+  .repo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--solana-blue);
+    text-decoration: none;
+    background: rgba(3, 225, 255, 0.1);
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(3, 225, 255, 0.2);
+  }
+  
+  .repo-link:hover {
+    background: rgba(3, 225, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
   
   .repo-structure pre {
@@ -777,6 +808,19 @@
     .scan-header h1 {
       font-size: 2rem;
     }
+    
+    .view-mode-toggle {
+      flex-wrap: wrap;
+    }
+    
+    .view-mode-btn {
+      font-size: 0.8rem;
+      padding: 8px 12px;
+    }
+    
+    .repo-structure {
+      padding: 1rem;
+    }
   }
   
   /* Dark mode enhancement */
@@ -946,4 +990,365 @@
   .code-line.good-line::after,
   .code-line.bad-line::after {
     display: none;
+  }
+
+  .folder-tree-container {
+    background: rgba(8, 8, 20, 0.6);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    max-height: 400px;
+    overflow: auto;
+    border: 1px solid rgba(153, 69, 255, 0.2);
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4), 0 5px 15px rgba(0, 0, 0, 0.2);
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  }
+
+  /* Tree item styling */
+  .folder-tree-container .rft-tree-item {
+    margin: 4px 0;
+    padding: 6px 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .folder-tree-container .rft-tree-item:hover {
+    background-color: rgba(153, 69, 255, 0.15);
+    transform: translateX(3px);
+  }
+
+  /* Highlight the current selected file */
+  .folder-tree-container .rft-tree-item.selected {
+    background-color: rgba(0, 255, 163, 0.15);
+    border-left: 2px solid var(--solana-teal);
+  }
+
+  /* Add a subtle glow effect to folder icons when open */
+  .folder-tree-container .folder-open {
+    text-shadow: 0 0 8px rgba(153, 69, 255, 0.6);
+  }
+
+  /* Add a subtle glow effect to file icons on hover */
+  .folder-tree-container .rft-tree-item:hover .file-icon {
+    text-shadow: 0 0 8px rgba(3, 225, 255, 0.6);
+  }
+
+  /* File type specific styling */
+  .folder-tree-container .file-type-rs::before,
+  .folder-tree-container .file-type-js::before,
+  .folder-tree-container .file-type-ts::before,
+  .folder-tree-container .file-type-py::before {
+    content: "";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--solana-blue);
+    opacity: 0.6;
+  }
+
+  .folder-tree-container .file-type-md::before,
+  .folder-tree-container .file-type-txt::before,
+  .folder-tree-container .file-type-toml::before {
+    content: "";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--solana-teal);
+    opacity: 0.6;
+  }
+
+  .folder-tree-container .file-type-lock::before {
+    content: "";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--solana-magenta);
+    opacity: 0.6;
+  }
+
+  /* Add a subtle connection line between parent and children */
+  .folder-tree-container .rft-tree-branch {
+    position: relative;
+  }
+
+  .folder-tree-container .rft-tree-branch::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -1px;
+    width: 10px;
+    height: 1px;
+    background: rgba(153, 69, 255, 0.3);
+  }
+
+  /* Selected file info panel */
+  .selected-file-info {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    border-left: 3px solid var(--solana-teal);
+    animation: slide-up 0.3s ease-out;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .selected-file-info::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--solana-teal), transparent);
+  }
+
+  .selected-file-info h5 {
+    margin: 0 0 10px 0;
+    color: var(--solana-teal);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .selected-file-info h5::before {
+    content: "📄";
+    font-size: 1rem;
+  }
+
+  .selected-file-info p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    padding-left: 10px;
+    border-left: 1px solid rgba(0, 255, 163, 0.2);
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Add a subtle glow effect to the selected file info panel */
+  .selected-file-info::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(0, 255, 163, 0.1) 0%, transparent 70%);
+    filter: blur(20px);
+    z-index: -1;
+  }
+
+  /* Add a subtle hover effect to the selected file info panel */
+  .selected-file-info:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+  }
+
+  /* Add a subtle hover effect for the entire tree container */
+  .folder-tree-container:hover {
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5), 0 8px 25px rgba(0, 0, 0, 0.3);
+    border-color: rgba(153, 69, 255, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  /* Add a subtle pulse animation to the root folder icon */
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .folder-tree-container .rft-tree-item:first-child .folder-icon {
+    animation: pulse 3s infinite ease-in-out;
+  }
+
+  /* Improve the appearance of the tree item text */
+  .folder-tree-container .rft-tree-item-text {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    letter-spacing: 0.3px;
+  }
+
+  /* Add a subtle background pattern to the folder tree container */
+  .folder-tree-container {
+    background-image: 
+      linear-gradient(rgba(153, 69, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(153, 69, 255, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: -1px -1px;
+  }
+
+  /* Add a subtle glow effect to the selected item */
+  .folder-tree-container .rft-tree-item.selected {
+    box-shadow: 0 0 15px rgba(0, 255, 163, 0.2);
+  }
+
+  /* Improve the appearance of the folder tree when it's empty */
+  .folder-tree-container:empty::after {
+    content: "No repository structure available";
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+  }
+
+  /* Add a subtle fade effect when the tree is loading */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .folder-tree-container {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  /* View mode toggle buttons */
+  .view-mode-toggle {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+  }
+
+  .view-mode-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(8, 8, 20, 0.8);
+    border: 1px solid rgba(153, 69, 255, 0.3);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+
+  .view-mode-btn:hover {
+    background: rgba(153, 69, 255, 0.2);
+    border-color: rgba(153, 69, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .view-mode-btn.active {
+    background: linear-gradient(90deg, rgba(153, 69, 255, 0.3), rgba(8, 8, 20, 0.8));
+    border-color: var(--solana-purple);
+    color: white;
+    box-shadow: 0 0 15px rgba(153, 69, 255, 0.3);
+    position: relative;
+  }
+
+  .view-mode-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30%;
+    height: 3px;
+    background: var(--solana-purple);
+    border-radius: 3px;
+  }
+
+  .view-mode-btn svg {
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+  }
+
+  .view-mode-btn:hover svg {
+    transform: scale(1.2);
+  }
+
+  /* Add a transition between view modes */
+  .folder-tree-container,
+  .repo-tree-graph-container,
+  .json-view {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* JSON view styling */
+  .json-view {
+    background: rgba(8, 8, 20, 0.6);
+    border-radius: 12px;
+    padding: 1rem;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: #fff;
+    overflow: auto;
+    max-height: 500px;
+    border: 1px solid rgba(153, 69, 255, 0.2);
+    white-space: pre-wrap;
+  }
+
+  .json-view::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .json-view::-webkit-scrollbar-track {
+    background: rgba(8, 8, 20, 0.4);
+    border-radius: 4px;
+  }
+
+  .json-view::-webkit-scrollbar-thumb {
+    background: rgba(153, 69, 255, 0.3);
+    border-radius: 4px;
+  }
+
+  .json-view::-webkit-scrollbar-thumb:hover {
+    background: rgba(153, 69, 255, 0.5);
   }

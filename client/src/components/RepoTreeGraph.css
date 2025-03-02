@@ -1,0 +1,301 @@
+.repo-tree-graph-container {
+  width: 100%;
+  height: 650px;
+  position: relative;
+  background: rgba(8, 8, 20, 0.6);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(153, 69, 255, 0.2);
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4), 0 5px 15px rgba(0, 0, 0, 0.2);
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  background-image: 
+    radial-gradient(rgba(153, 69, 255, 0.03) 2px, transparent 2px),
+    radial-gradient(rgba(0, 255, 163, 0.03) 2px, transparent 2px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+}
+
+.loading-tree {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+}
+
+/* Node styling */
+.tree-node {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(8, 8, 20, 0.8);
+  border: 1px solid rgba(153, 69, 255, 0.2);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  min-width: 120px;
+}
+
+.tree-node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  border-color: rgba(153, 69, 255, 0.4);
+}
+
+/* Subfolder styling */
+.folder-node {
+  background: linear-gradient(90deg, rgba(153, 69, 255, 0.2), rgba(8, 8, 20, 0.8));
+  border-left: 3px solid var(--solana-purple);
+}
+
+.file-node {
+  background: rgba(8, 8, 20, 0.8);
+  border-left: 3px solid var(--solana-blue);
+}
+
+.code-file {
+  border-left: 3px solid var(--solana-blue);
+}
+
+.doc-file {
+  border-left: 3px solid var(--solana-teal);
+}
+
+.archive-file {
+  border-left: 3px solid var(--solana-magenta);
+}
+
+.image-file {
+  border-left: 3px solid #FFD700;
+}
+
+.node-icon {
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  font-size: 1rem;
+}
+
+.folder-node .node-icon {
+  color: var(--solana-purple);
+}
+
+.code-file .node-icon {
+  color: var(--solana-blue);
+}
+
+.doc-file .node-icon {
+  color: var(--solana-teal);
+}
+
+.archive-file .node-icon {
+  color: var(--solana-magenta);
+}
+
+.image-file .node-icon {
+  color: #FFD700;
+}
+
+.node-label {
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Path styling */
+.rd3t-link {
+  stroke: rgba(153, 69, 255, 0.4) !important;
+  stroke-width: 1.5px !important;
+  transition: stroke 0.2s ease;
+}
+
+.rd3t-link:hover {
+  stroke: var(--solana-purple) !important;
+  stroke-width: 2px !important;
+}
+
+/* Root folder styling */
+.root-node {
+  background: linear-gradient(90deg, rgba(0, 255, 163, 0.3), rgba(8, 8, 20, 0.8));
+  border-left: 3px solid var(--solana-teal);
+  font-weight: bold;
+  box-shadow: 0 0 15px rgba(0, 255, 163, 0.2);
+  font-size: 1.1em;
+}
+
+/* Nested folder depth indicators */
+.tree-node[data-depth="1"] {
+  border-left-width: 4px;
+}
+
+.tree-node[data-depth="2"] {
+  border-left-width: 3px;
+  background: linear-gradient(90deg, rgba(153, 69, 255, 0.15), rgba(8, 8, 20, 0.8));
+}
+
+.tree-node[data-depth="3"] {
+  border-left-width: 2px;
+  background: linear-gradient(90deg, rgba(153, 69, 255, 0.1), rgba(8, 8, 20, 0.8));
+}
+
+/* Zoom controls */
+.rd3t-tree-container {
+  cursor: grab;
+}
+
+.rd3t-tree-container:active {
+  cursor: grabbing;
+}
+
+/* Tooltip for file description */
+.tree-node::after {
+  content: attr(data-description);
+  position: absolute;
+  top: 0;
+  left: 100%;
+  background: rgba(10, 10, 18, 0.95);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  width: max-content;
+  max-width: 250px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--solana-teal);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+  pointer-events: none;
+  z-index: 10;
+  white-space: normal;
+  line-height: 1.4;
+  margin-left: 10px;
+}
+
+.tree-node:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Animation for node appearance */
+@keyframes nodeAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tree-node {
+  animation: nodeAppear 0.3s ease-out forwards;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .repo-tree-graph-container {
+    height: 400px;
+  }
+  
+  .tree-node {
+    max-width: 150px;
+    padding: 4px 8px;
+  }
+  
+  .node-label {
+    font-size: 0.75rem;
+  }
+}
+
+/* Improve the selected file info panel */
+.selected-file-info {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  background: rgba(10, 10, 18, 0.95);
+  padding: 15px 20px;
+  border-radius: 8px;
+  border-left: 4px solid var(--solana-teal);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  max-width: calc(100% - 40px);
+  animation: slideUp 0.3s ease-out;
+}
+
+.selected-file-info h5 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: var(--solana-teal);
+  font-size: 1.1rem;
+}
+
+.selected-file-info p {
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Add a subtle connection line between parent and child nodes */
+.rd3t-tree-container g.rd3t-node {
+  position: relative;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Error message styling */
+.error-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: rgba(255, 100, 100, 0.9);
+  text-align: center;
+  padding: 20px;
+}
+
+.error-message p {
+  margin-bottom: 15px;
+  font-size: 1rem;
+  max-width: 80%;
+}
+
+.error-message button {
+  background: rgba(153, 69, 255, 0.2);
+  color: #fff;
+  border: 1px solid rgba(153, 69, 255, 0.4);
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.error-message button:hover {
+  background: rgba(153, 69, 255, 0.4);
+  transform: translateY(-2px);
+} 
