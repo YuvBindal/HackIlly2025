@@ -1,4 +1,5 @@
 import os
+from pprint import pprint
 import sys
 import json
 from typing import Dict, List, Optional, Any, Tuple
@@ -15,7 +16,7 @@ class SolanaSecurityAnalyzer:
     Uses an agentic approach with multiple LLM calls.
     """
     
-    def __init__(self, llm_provider: str = "openai", model_name: str = "gpt-4", api_key: Optional[str] = None):
+    def __init__(self, llm_provider: str = "openai", model_name: str = "gpt-4o-mini", api_key: Optional[str] = None):
         """
         Initialize the SolanaSecurityAnalyzer.
         
@@ -763,23 +764,13 @@ if __name__ == "__main__":
     analyzer = SolanaSecurityAnalyzer(llm_provider="openai", model_name="gpt-4")
     
     # Example repository URL
-    repo_url = "https://github.com/solana-developers/CRUD-dApp"
+    repo_url = "https://github.com/metaDAOproject/solana-timelock/tree/1a6d1e2dff20fbd46fb1209709c9a496d92f927d"
     
     # Analyze the repository using both approaches
-    print("\n=== HYBRID APPROACH ===")
-    hybrid_results = analyzer.analyze_repository_hybrid(repo_url)
-    print(f"Analysis completed in {analyzer.analysis_time:.2f} seconds")
-    print(f"Overall risk score: {hybrid_results['overall_risk_score']}/10")
-    
-    print("\n=== STRUCTURE-ONLY APPROACH ===")
-    structure_results = analyzer.analyze_repository_structure_only(repo_url)
-    print(f"Analysis completed in {analyzer.analysis_time:.2f} seconds")
-    print(f"Overall risk score: {structure_results['overall_risk_score']}/10")
-    
-    # Compare the results
-    print("\n=== COMPARISON ===")
-    print(f"Hybrid approach found {sum(len(vulns) for vulns in hybrid_results['security_vulnerabilities'].values())} security vulnerabilities")
-    print(f"Structure-only approach found {sum(len(vulns) for vulns in structure_results['security_vulnerabilities'].values())} security vulnerabilities")
-    
-    print(f"Hybrid approach found {sum(len(behaviors) for behaviors in hybrid_results['malicious_behavior'].values())} malicious behaviors")
-    print(f"Structure-only approach found {sum(len(behaviors) for behaviors in structure_results['malicious_behavior'].values())} malicious behaviors") 
+    # print("\n=== HYBRID APPROACH ===")
+    # hybrid_results = analyzer.analyze_repository_hybrid(repo_url)
+    # pprint(hybrid_results)
+
+    # print("\n=== STRUCTURE-ONLY APPROACH ===")
+    # structure_results = analyzer.analyze_repository_structure_only(repo_url)
+    # pprint(structure_results)
