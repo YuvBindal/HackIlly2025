@@ -196,7 +196,7 @@ const Signup = () => {
                 {/* Auth Section */}
                 <section className="auth-section">
                     <div className="welcome-header">
-                        <h1>Welcome to HiveSolana</h1>
+                        <h1>Welcome to Solarc</h1>
                         <h4>Connect your wallet or sign in with email to get started</h4>
                     </div>
                     <div className="auth-buttons">
@@ -273,7 +273,7 @@ const Signup = () => {
                 <footer className="footer">
                     <div className="footer-content">
                         <div>
-                            <img src={logo} alt="HiveSolana Logo" className="footer-logo" />
+                            <img src={logo} alt="Solarc Logo" className="footer-logo" />
                             <p>Making Solana accessible and efficient for everyone.</p>
                         </div>
                         <div className="footer-links">
@@ -298,7 +298,7 @@ const Signup = () => {
                         </div>
                     </div>
                     <div className="footer-bottom">
-                        <p>© 2025 HiveSolana. All rights reserved.</p>
+                        <p>© 2025 Solarc. All rights reserved.</p>
                     </div>
                 </footer>
             </div>

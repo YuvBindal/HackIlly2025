@@ -22,7 +22,7 @@ const Navbar = ({ handleLogout }) => {
                         alt="SolArc Logo"
                         className="navbar-logo"
                     />
-                    <span className="navbar-title">SolArc</span>
+                    <span className="navbar-title">Solarc</span>
                 </div>
 
                 {/* Middle Section - Navigation Links */}
