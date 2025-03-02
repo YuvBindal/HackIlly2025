@@ -598,7 +598,8 @@ async def validate_program_id(request: ProgramIdRequest = Body(...)):
         return {
             "status": "success",
             "validated": True,
-            "RepoStructure": json.dumps(enhanced_structure, indent=2)
+            "RepoStructure": json.dumps(enhanced_structure, indent=2),
+            "repoUrl": repo_url
         }
         
     except Exception as e:
