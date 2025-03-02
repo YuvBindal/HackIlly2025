@@ -549,6 +549,7 @@ MOCK_SECURITY_ISSUES = [
 @app.post('/api/validate-program')
 async def validate_program_id(request: ProgramIdRequest = Body(...)):
     import requests
+
     from backend.github_fetcher.github_fetcher import GitHubFetcher
     from backend.llm_analyzer.security_analyzer import SolanaSecurityAnalyzer
     
