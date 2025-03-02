@@ -805,6 +805,11 @@ async def scan_code(request: ScanRequest = Body(...)):
                 line_num, assessment, explanation = line_info
                 # Capitalize the assessment and move it to the third position
                 reformatted_lines.append([line_num, explanation, assessment.capitalize()])
+
+        # Line number has to be decremented by 1 since the line number starts from 1 in the analysis results
+        # but starts from 0 in the reformatted lines
+        for line in reformatted_lines:
+            line[0] = line[0] - 1
         
         # Generate a report based on the analysis results
         summary = analysis_results.get("summary", "No summary available")
