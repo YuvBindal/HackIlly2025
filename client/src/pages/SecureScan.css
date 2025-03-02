@@ -699,9 +699,55 @@
   }
   
   .report-content {
-    white-space: pre-line;
+    white-space: pre-wrap;
     line-height: 1.7;
     color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .report-content h1,
+  .report-content h2,
+  .report-content h3,
+  .report-content h4,
+  .report-content h5,
+  .report-content h6 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: #fff;
+    font-weight: 600;
+  }
+  
+  .report-content h1 {
+    font-size: 1.8rem;
+  }
+  
+  .report-content h2 {
+    font-size: 1.5rem;
+  }
+  
+  .report-content h3 {
+    font-size: 1.3rem;
+  }
+  
+  .report-content p {
+    margin-bottom: 1rem;
+  }
+  
+  .report-content ul,
+  .report-content ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+  }
+  
+  .report-content li {
+    margin-bottom: 0.5rem;
+  }
+  
+  .report-content code {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 0.9rem;
   }
   
   /* Enhanced 3D floating animation for elements */

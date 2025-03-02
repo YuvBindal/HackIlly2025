@@ -192,7 +192,7 @@ Format your response as follows:
     [line_number, "good"/"bad", "explanation"],
     ...
   ],
-  "summary": "Overall assessment of the code's security"
+  "summary": "## Summary\n\nOverall assessment of the code's security\n\n## Vulnerabilities\n<vulnerabilities>\n\n## Recommendations\n<recommendations>"
 }}
 ```
 """

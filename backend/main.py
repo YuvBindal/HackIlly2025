@@ -824,7 +824,6 @@ async def scan_code(request: ScanRequest = Body(...)):
         summary = analysis_results.get("summary", "No summary available")
         
         report = f"""
-# Security Scan Report for {github_url}
 
 {summary}
 

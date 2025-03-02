@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaSearch, FaGithub, FaShieldAlt } from 'react-icons/fa';
+import ReactMarkdown from 'react-markdown';
 import './SecureScan.css';
 
 const SecureScan = () => {
@@ -154,7 +155,7 @@ const SecureScan = () => {
         {isValidating && (
           <div className="loading-indicator">
             <div className="spinner"></div>
-            <p>Validating program ID...</p>
+            <p>Validating program ID using osec.io...</p>
           </div>
         )}
         
@@ -253,7 +254,7 @@ const SecureScan = () => {
               <div className="security-report">
                 <h4>Security Report:</h4>
                 <div className="report-content">
-                  {securityScanResult.Report}
+                  <ReactMarkdown>{securityScanResult.Report}</ReactMarkdown>
                 </div>
               </div>
             </div>
