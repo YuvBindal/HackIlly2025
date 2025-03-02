@@ -272,7 +272,7 @@ Repository Summary:
 - Test Files: {summary.get('test_files', 0)}
 - Other Files: {summary.get('other_files', 0)}
 
-I'll provide you with lists of files categorized by type. Please select up to 5 files that are most likely to contain security vulnerabilities or malicious behavior.
+I'll provide you with lists of files categorized by type. Please select up to 3 files that are most likely to contain security vulnerabilities or malicious behavior.
 
 Program Files:
 """
@@ -297,12 +297,15 @@ Program Files:
                     prompt += f"- {file_path}\n"
             
             prompt += """
-Please rank the top 5 files in order of importance for security analysis. For each file, provide a brief explanation of why you selected it.
+Please rank the top 3 files in order of importance for security analysis. For each file, provide a brief explanation of why you selected it.
 
-Format your response as:
-1. [file_path] - [reason for selection]
-2. [file_path] - [reason for selection]
-...
+IMPORTANT: Format your response exactly as shown below. Do NOT use backticks, asterisks, or any other markdown formatting in the file paths:
+
+1. file_path - reason for selection
+2. file_path - reason for selection
+3. file_path - reason for selection
+
+The file paths should be exactly as they appear in the list above, with no additional formatting.
 """
             
         else:  # structure_only approach
@@ -324,14 +327,17 @@ Examine the repository structure below and identify which files are likely to co
 Repository Structure:
 {json.dumps(structure, indent=2)[:3000]}  # Truncated to avoid token limits
 
-Based on the structure, select up to 5 files that are most likely to contain security vulnerabilities or malicious behavior in Solana program code.
+Based on the structure, select up to 3 files that are most likely to contain security vulnerabilities or malicious behavior in Solana program code.
 
-Please rank the top 5 files in order of importance for security analysis. For each file, provide a brief explanation of why you selected it.
+Please rank the top 3 files in order of importance for security analysis. For each file, provide a brief explanation of why you selected it.
 
-Format your response as:
-1. [file_path] - [reason for selection]
-2. [file_path] - [reason for selection]
-...
+IMPORTANT: Format your response exactly as shown below. Do NOT use backticks, asterisks, or any other markdown formatting in the file paths:
+
+1. file_path - reason for selection
+2. file_path - reason for selection
+3. file_path - reason for selection
+
+The file paths should be exactly as they appear in the repository structure, with no additional formatting.
 """
         
         return prompt
@@ -364,8 +370,11 @@ Format your response as:
                     # Remove the number and dot
                     file_path = file_with_num.split('. ', 1)[-1].strip()
                     
+                    # Clean up the file path (remove backticks, brackets, etc.)
+                    file_path = self._clean_file_path(file_path)
+                    
                     # Validate that this looks like a file path (contains a dot or slash)
-                    if '.' in file_path or '/' in file_path:
+                    if ('.' in file_path or '/' in file_path) and file_path not in selected_files:
                         selected_files.append(file_path)
         
         # If no files were found using the numbered format, try to find file paths in the text
@@ -384,7 +393,12 @@ Format your response as:
                 for match in matches:
                     if isinstance(match, tuple):
                         match = match[0]  # Take the first group if there are multiple
-                    selected_files.append(match)
+                    
+                    # Clean up the file path
+                    file_path = self._clean_file_path(match)
+                    
+                    if file_path and file_path not in selected_files:
+                        selected_files.append(file_path)
                 
                 if selected_files:
                     break
@@ -400,20 +414,48 @@ Format your response as:
                 program_files = repo_data.get("program", [])
                 for file_info in program_files[:3]:  # Take up to 3 program files
                     file_path = file_info.get("path", "")
-                    if file_path:
+                    if file_path and file_path not in selected_files:
                         selected_files.append(file_path)
             elif "files" in repo_data:
                 # This is the structure-only approach data
                 files = repo_data.get("files", [])
                 for file_path in files[:3]:  # Take up to 3 files
-                    if file_path and (file_path.endswith('.rs') or file_path.endswith('.toml')):
+                    if file_path and (file_path.endswith('.rs') or file_path.endswith('.toml')) and file_path not in selected_files:
                         selected_files.append(file_path)
         
-        # Limit to 5 files
-        selected_files = selected_files[:5]
+        # Limit to 3 files
+        selected_files = selected_files[:3]
         
         print(f"Selected files for analysis: {selected_files}")
         return selected_files
+    
+    def _clean_file_path(self, file_path: str) -> str:
+        """
+        Clean up a file path by removing backticks, brackets, and other formatting.
+        
+        Args:
+            file_path (str): The file path to clean
+            
+        Returns:
+            str: The cleaned file path
+        """
+        # Remove backticks
+        clean_path = file_path.replace('`', '')
+        
+        # Remove brackets
+        clean_path = clean_path.replace('[', '').replace(']', '')
+        
+        # Remove asterisks (markdown formatting)
+        clean_path = clean_path.replace('*', '')
+        
+        # Remove any text in parentheses at the end of the file path
+        import re
+        clean_path = re.sub(r'\s*\([^)]*\)\s*$', '', clean_path)
+        
+        # Remove any leading/trailing whitespace
+        clean_path = clean_path.strip()
+        
+        return clean_path
     
     def _fetch_file_contents(self, repo_url: str, file_paths: List[str]) -> Dict[str, str]:
         """
