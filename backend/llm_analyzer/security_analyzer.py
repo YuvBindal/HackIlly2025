@@ -1,14 +1,16 @@
-import os
-from pprint import pprint
-import sys
 import json
-from typing import Dict, List, Optional, Any, Tuple
+import os
+import sys
 import time
+from pprint import pprint
+from typing import Any, Dict, List, Optional, Tuple
+
 import dotenv
 
 # Add the parent directory to the path so we can import the github_fetcher module
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from github_fetcher.github_fetcher import GitHubFetcher
+
 
 class SolanaSecurityAnalyzer:
     """
@@ -97,7 +99,7 @@ class SolanaSecurityAnalyzer:
         if self.llm_provider.lower() == "openai":
             try:
                 import openai
-                
+
                 # Initialize the OpenAI client
                 client = openai.OpenAI(api_key=self.api_key)
                 
@@ -112,7 +114,7 @@ class SolanaSecurityAnalyzer:
                         {"role": "user", "content": prompt}
                     ],
                     max_tokens=max_tokens,
-                    temperature=0.5,  # Lower temperature for more deterministic responses
+                    temperature=0,  # Lower temperature for more deterministic responses
                 )
                 
                 # Extract the response text
@@ -654,7 +656,7 @@ Here are the files to analyze:
         
         # Look for bullet points or numbered items
         import re
-        
+
         # Pattern to match file and line information
         file_line_pattern = r'(?:found in|file:?)\s+([a-zA-Z0-9_\-/.]+)(?:,?\s+lines?:?\s+(\d+(?:-\d+)?))?\b'
         

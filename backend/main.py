@@ -763,8 +763,9 @@ def create_fallback_descriptions(repo_structure):
 
 @app.post('/api/scan')
 async def scan_code(request: ScanRequest = Body(...)):
-    from backend.llm_analyzer.testing import analyze_repository_line_by_line
     import time
+
+    from backend.llm_analyzer.testing import analyze_repository_line_by_line
     
     github_url = request.githubUrl
     
