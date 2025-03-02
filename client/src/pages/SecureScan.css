@@ -1,0 +1,252 @@
+/* SecureScan.css */
+.secure-scan-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: rgba(14, 14, 22, 0.7);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(0, 255, 163, 0.1);
+  }
+  
+  .scan-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .scan-header h1 {
+    background: linear-gradient(90deg, #00FFA3, #9945FF, #E40F91);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .scan-header p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+  }
+  
+  .scan-section {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(153, 69, 255, 0.15);
+    transition: all 0.3s ease;
+  }
+  
+  .scan-section h2 {
+    color: #fff;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .scan-section.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  
+  .input-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .input-group input {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 255, 163, 0.3);
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff;
+    font-size: 1rem;
+  }
+  
+  .input-group input:focus {
+    outline: none;
+    border-color: #00FFA3;
+    box-shadow: 0 0 0 2px rgba(0, 255, 163, 0.2);
+  }
+  
+  .input-group button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .validate-btn {
+    background: linear-gradient(90deg, #00FFA3, #03E1FF);
+    color: #000;
+  }
+  
+  .scan-btn {
+    background: linear-gradient(90deg, #9945FF, #E40F91);
+    color: #fff;
+  }
+  
+  .input-group button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .input-group button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .loading-indicator {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(0, 255, 163, 0.3);
+    border-top-color: #00FFA3;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .validation-result {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 6px;
+  }
+  
+  .validation-result.success {
+    background: rgba(0, 255, 163, 0.1);
+    border: 1px solid rgba(0, 255, 163, 0.3);
+  }
+  
+  .validation-result.error {
+    background: rgba(228, 15, 145, 0.1);
+    border: 1px solid rgba(228, 15, 145, 0.3);
+  }
+  
+  .validation-result h3 {
+    margin-bottom: 0.5rem;
+    color: #fff;
+  }
+  
+  .repo-structure {
+    margin-top: 1rem;
+  }
+  
+  .repo-structure pre {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1rem;
+    border-radius: 6px;
+    overflow: auto;
+    max-height: 300px;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+  }
+  
+  .scan-results {
+    margin-top: 1.5rem;
+  }
+  
+  .code-display {
+    margin: 1.5rem 0;
+  }
+  
+  .code-container {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    max-height: 400px;
+    overflow: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  
+  .code-line {
+    display: flex;
+    margin: 0;
+    padding: 0.2rem 0;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .code-line.good-line {
+    background: rgba(0, 255, 163, 0.1);
+    border-left: 3px solid #00FFA3;
+  }
+  
+  .code-line.bad-line {
+    background: rgba(228, 15, 145, 0.1);
+    border-left: 3px solid #E40F91;
+  }
+  
+  .line-number {
+    display: inline-block;
+    width: 40px;
+    text-align: right;
+    padding-right: 1rem;
+    color: rgba(255, 255, 255, 0.4);
+    user-select: none;
+  }
+  
+  .line-content {
+    flex: 1;
+  }
+  
+  .issues-list {
+    margin: 1.5rem 0;
+  }
+  
+  .issues-list ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .issue-item {
+    background: rgba(228, 15, 145, 0.1);
+    padding: 0.8rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid #E40F91;
+  }
+  
+  .line-ref {
+    font-weight: bold;
+    color: #E40F91;
+  }
+  
+  .security-report {
+    background: rgba(153, 69, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 6px;
+    border: 1px solid rgba(153, 69, 255, 0.3);
+  }
+  
+  .report-content {
+    white-space: pre-line;
+    line-height: 1.6;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }

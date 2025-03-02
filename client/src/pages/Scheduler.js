@@ -677,6 +677,68 @@ function EnhancedSolanaWallet() {
   
   return (
     <div className="solana-wallet-container">
+      {/* Animated background blobs */}
+      <div 
+        className="blob-oval blob-oval-horizontal glow" 
+        style={{
+          background: 'linear-gradient(135deg, rgba(0, 255, 163, 0.4) 0%, rgba(3, 225, 255, 0.3) 100%)',
+          top: '10%',
+          left: '-10%',
+          animation: 'float-slow 20s ease-in-out infinite'
+        }}
+      />
+      
+      <div 
+        className="blob-oval blob-oval-vertical" 
+        style={{
+          background: 'linear-gradient(135deg, rgba(0, 255, 163, 0.2) 0%, rgba(3, 225, 255, 0.15) 100%)',
+          bottom: '15%',
+          right: '-8%',
+          animation: 'float-medium 18s ease-in-out infinite'
+        }}
+      />
+      
+      <div 
+        className="blob-pill" 
+        style={{
+          background: 'linear-gradient(135deg, rgba(3, 225, 255, 0.25) 0%, rgba(0, 255, 163, 0.2) 100%)',
+          top: '30%',
+          right: '10%',
+          animation: 'float-fast 15s ease-in-out infinite'
+        }}
+      />
+      
+      <div 
+        className="blob-ring" 
+        style={{
+          borderColor: 'rgba(0, 255, 163, 0.3)',
+          bottom: '10%',
+          left: '15%',
+          animation: 'rotate-slow 30s linear infinite'
+        }}
+      />
+      
+      <div 
+        className="blob-small-circle" 
+        style={{
+          background: 'rgba(0, 255, 163, 0.8)',
+          top: '25%',
+          left: '20%',
+          animation: 'pulse 10s ease-in-out infinite'
+        }}
+      />
+      
+      <div 
+        className="blob-small-circle" 
+        style={{
+          background: 'rgba(3, 225, 255, 0.8)',
+          top: '60%',
+          right: '25%',
+          animation: 'pulse 8s ease-in-out infinite'
+        }}
+      />
+
+      {/* Original wallet cards */}
       <div className="solana-card wallet-card">
         <div className="card-glow"></div>
         <div className="solana-card-content">
@@ -724,105 +786,151 @@ function EnhancedSolanaWallet() {
       
       {wallet && (
         <>
-          <div className="solana-card wallet-details-card">
-            <div className="card-glow"></div>
-            <div className="solana-card-content">
-              <div className="card-header">
-                <div className="icon-container">
-                  <i className="card-icon">🔑</i>
+          {/* Add a floating blob near wallet details */}
+          <div 
+            className="blob-small-circle" 
+            style={{
+              background: 'rgba(0, 255, 163, 0.6)',
+              top: '32%',
+              left: '30%',
+              width: '8px',
+              height: '8px',
+              animation: 'pulse 6s ease-in-out infinite'
+            }}
+          />
+
+        <div 
+            className="blob-small-circle" 
+            style={{
+              background: 'rgba(0, 255, 163, 0.6)',
+              top: '32%',
+              left: '30%',
+              width: '8px',
+              height: '8px',
+              animation: 'pulse 6s ease-in-out infinite'
+            }}
+          />
+          
+          <div className="cards-row"
+          
+          style={{
+            display: 'flex',
+            gap: '30px',
+            flexDirection: 'row',
+            width: '100%'
+          }}>
+            <div className="solana-card wallet-details-card" style={{ flex: 1 }}>
+              <div className="card-glow"></div>
+              <div className="solana-card-content">
+                <div className="card-header">
+                  <div className="icon-container">
+                    <i className="card-icon">🔑</i>
+                  </div>
+                  <h3 className="card-title">Wallet Details</h3>
                 </div>
-                <h3 className="card-title">Wallet Details</h3>
+                
+                <div className="key-display">
+                  <div className="key-item">
+                    <div className="key-label">Public Key:</div>
+                    <div className="key-value">
+                      <div className="key-text">{wallet.publicKeyString}</div>
+                      <button 
+                        className="copy-button"
+                        onClick={() => copyToClipboard(wallet.publicKeyString)}
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="key-item">
+                    <div className="key-label">Private Key:</div>
+                    <div className="key-value">
+                      <div className="key-text private-key-text">
+                        {showPrivateKey 
+                          ? wallet.privateKey 
+                          : `${truncateAddress(wallet.privateKey, 5, 5)}`
+                        }
+                      </div>
+                      <button 
+                        className="copy-button"
+                        onClick={() => copyToClipboard(wallet.privateKey)}
+                      >
+                        Copy
+                      </button>
+                      <button 
+                        className="toggle-button"
+                        onClick={toggleShowPrivateKey}
+                      >
+                        {showPrivateKey ? 'Hide' : 'Show'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-              
-              <div className="key-display">
-                <div className="key-item">
-                  <div className="key-label">Public Key:</div>
-                  <div className="key-value">
-                    <div className="key-text">{wallet.publicKeyString}</div>
-                    <button 
-                      className="copy-button"
-                      onClick={() => copyToClipboard(wallet.publicKeyString)}
-                    >
-                      Copy
-                    </button>
+            </div>
+  
+            <div className="solana-card balance-card" style={{ flex: 1 }}>
+              <div className="card-glow"></div>
+              <div className="solana-card-content">
+                <div className="card-header">
+                  <div className="icon-container">
+                    <i className="card-icon">💎</i>
+                  </div>
+                  <h3 className="card-title">Balance</h3>
+                  <button 
+                    onClick={() => checkBalance()} 
+                    disabled={isLoading}
+                    className="refresh-button"
+                  >
+                    🔄
+                  </button>
+                </div>
+                
+                <div className="balance-display">
+                  {isBalanceRefreshing && (
+                    <div className="refresh-indicator">Refreshing...</div>
+                  )}
+                  
+                  <div className="balance-amount">
+                    <span className="balance-value">{formatBalance(balance)}</span>
+                    <span className="balance-currency">SOL</span>
+                  </div>
+                  
+                  <div className="balance-usd">
+                    {balance !== null && (
+                      <span>≈ ${(balance * 20).toFixed(2)} USD</span>
+                    )}
                   </div>
                 </div>
                 
-                <div className="key-item">
-                  <div className="key-label">Private Key:</div>
-                  <div className="key-value">
-                    <div className="key-text private-key-text">
-                      {showPrivateKey 
-                        ? wallet.privateKey 
-                        : `${truncateAddress(wallet.privateKey, 5, 5)}`
-                      }
-                    </div>
-                    <button 
-                      className="copy-button"
-                      onClick={() => copyToClipboard(wallet.privateKey)}
-                    >
-                      Copy
-                    </button>
-                    <button 
-                      className="toggle-button"
-                      onClick={toggleShowPrivateKey}
-                    >
-                      {showPrivateKey ? 'Hide' : 'Show'}
-                    </button>
+                <div className="balance-info">
+                  <div className="info-item">
+                    <span className="info-label">Network</span>
+                    <span className="info-value">{network.charAt(0).toUpperCase() + network.slice(1)}</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">Last Updated</span>
+                    <span className="info-value">{new Date().toLocaleTimeString()}</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="solana-card balance-card">
-            <div className="card-glow"></div>
-            <div className="solana-card-content">
-              <div className="card-header">
-                <div className="icon-container">
-                  <i className="card-icon">💎</i>
-                </div>
-                <h3 className="card-title">Balance</h3>
-                <button 
-                  onClick={() => checkBalance()} 
-                  disabled={isLoading}
-                  className="refresh-button"
-                >
-                  🔄
-                </button>
-              </div>
-              
-              <div className="balance-display">
-                {isBalanceRefreshing && (
-                  <div className="refresh-indicator">Refreshing...</div>
-                )}
-                
-                <div className="balance-amount">
-                  <span className="balance-value">{formatBalance(balance)}</span>
-                  <span className="balance-currency">SOL</span>
-                </div>
-                
-                <div className="balance-usd">
-                  {balance !== null && (
-                    <span>≈ ${(balance * 20).toFixed(2)} USD</span>
-                  )}
-                </div>
-              </div>
-              
-              <div className="balance-info">
-                <div className="info-item">
-                  <span className="info-label">Network</span>
-                  <span className="info-value">{network.charAt(0).toUpperCase() + network.slice(1)}</span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">Last Updated</span>
-                  <span className="info-value">{new Date().toLocaleTimeString()}</span>
-                </div>
-              </div>
-              
-            </div>
-          </div>
-          
+          {/* Add a blob between the cards */}
+          <div 
+            className="blob-pill" 
+            style={{
+              background: 'linear-gradient(135deg, rgba(3, 225, 255, 0.15) 0%, rgba(0, 255, 163, 0.1) 100%)',
+              top: '45%',
+              left: '45%',
+              width: '60px',
+              height: '20px',
+              transform: 'rotate(45deg)',
+              animation: 'float-fast 12s ease-in-out infinite'
+            }}
+          />
           
           {/* Network Stats Card */}
           <div className="solana-card network-stats-card">
@@ -885,6 +993,18 @@ function EnhancedSolanaWallet() {
             </div>
           </div>
           
+          {/* Add a glowing ring near send/receive area */}
+          <div 
+            className="blob-ring" 
+            style={{
+              borderColor: 'rgba(3, 225, 255, 0.2)',
+              width: '100px',
+              height: '100px',
+              top: '65%',
+              right: '12%',
+              animation: 'rotate-slow 25s linear infinite reverse'
+            }}
+          />
 
           {/* Send Transaction Card */}
           <div className="solana-card send-card">
@@ -951,7 +1071,21 @@ function EnhancedSolanaWallet() {
             </div>
           </div>
           
-          {/* Schedule Transaction Card - NEW */}
+          {/* Add animated blob near schedule area */}
+          <div 
+            className="blob-oval blob-oval-horizontal" 
+            style={{
+              background: 'linear-gradient(135deg, rgba(0, 255, 163, 0.1) 0%, rgba(3, 225, 255, 0.08) 100%)',
+              width: '200px',
+              height: '100px',
+              bottom: '15%',
+              left: '25%',
+              zIndex: '-1',
+              animation: 'float-medium 25s ease-in-out infinite'
+            }}
+          />
+          
+          {/* Schedule Transaction Card */}
           <div className="solana-card schedule-card">
             <div className="card-glow"></div>
             <div className="solana-card-content">
@@ -1090,6 +1224,31 @@ function EnhancedSolanaWallet() {
               </div>
             </div>
           </div>
+          
+          {/* Add some sparkle blobs near transactions */}
+          <div 
+            className="blob-small-circle" 
+            style={{
+              background: 'rgba(0, 255, 163, 0.7)',
+              width: '6px',
+              height: '6px',
+              bottom: '5%',
+              right: '10%',
+              animation: 'pulse 4s ease-in-out infinite'
+            }}
+          />
+          
+          <div 
+            className="blob-small-circle" 
+            style={{
+              background: 'rgba(3, 225, 255, 0.7)',
+              width: '10px',
+              height: '10px',
+              bottom: '8%',
+              right: '15%',
+              animation: 'pulse 7s ease-in-out infinite'
+            }}
+          />
           
           <div className="solana-card transactions-card">
             <div className="card-glow"></div>

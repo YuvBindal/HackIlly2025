@@ -1,58 +1,20 @@
 import { usePrivy } from "@privy-io/react-auth";
 import React, { useEffect, useState, useCallback } from "react";
 import { FaSync } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
 import Card from "../components/Card";
-import Navbar from "../components/navbar";
 import "./Dashboard.css";
 import NetworkContent from '../components/NetworkContent';
 import SentimentContent from "../components/SentimentContent";
 
 const Dashboard = () => {
-    const { user, logout } = usePrivy();
-    const navigate = useNavigate();
+    const { user } = usePrivy();
     const [activeSection, setActiveSection] = useState("nfts");
     const [nfts, setNfts] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const handleLogout = async () => {
-        try {
-            await logout();
-            navigate("/");
-        } catch (error) {
-            console.error("Error during logout:", error);
-        }
-    };
-
     // Fetch NFTs when NFT section is active
     useEffect(() => {
-        // Uncomment after the api is ready // change the url to the api url
-        // const fetchNFTs = async () => {
-        //     if (activeSection === 'nfts') {
-        //         setLoading(true);
-        //         try {
-        //             const response = await fetch('https://exampleapifornfts.com/nfts');
-        //             const data = await response.json();
-        //             setNfts(data);
-        //         } catch (error) {
-        //             console.error('Error fetching NFTs:', error);
-        //         } finally {
-        //             setLoading(false);
-        //         }
-        //     }
-        // };
-
-        // fetchNFTs();
-
-        // delete after the api is ready // start of mock nft data
-        // mock nft data for 9 pictures all with the same image (https://www.google.com/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FSolana_%2528blockchain_platform%2529&psig=AOvVaw3TWGzfJ-uKp0e1EwCIQm2V&ust=1739151063952000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCKDf6ty4tYsDFQAAAAAdAAAAABAE)
-        // response is an array of 9 objects with the following structure:
-        // {
-        //     image: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FSolana_%2528blockchain_platform%2529&psig=AOvVaw3TWGzfJ-uKp0e1EwCIQm2V&ust=1739151063952000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCKDf6ty4tYsDFQAAAAAdAAAAABAE',
-        //     name: 'Solana',
-        //     price: 100,
-        //     volume: 1000
-        // }
+        // Mock nft data
         const mockNfts = Array.from({ length: 9 }, (_, index) => ({
             image: "https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png",
             name: "Solana",
@@ -61,15 +23,12 @@ const Dashboard = () => {
         }));
         setNfts(mockNfts);
         setLoading(false);
-
-        // // end of mock nft data
     }, [activeSection]);
 
     const truncateAddress = (address) => {
         if (!address) return "";
         return `${address.slice(0, 6)}...${address.slice(-4)}`;
     };
-
 
     const NFTContent = () => {
         const [nfts, setNfts] = useState([]);
@@ -174,105 +133,101 @@ const Dashboard = () => {
     };
 
     return (
-        <>
-            <Navbar handleLogout={handleLogout} />
-            <div className="dashboard-container">
-
-                {/* Animated Background */}
-                <div className="animated-background">
-                    {/* Original circular blobs */}
-                    <div className="blob blob-1"></div>
-                    <div className="blob blob-2"></div>
-                    <div className="blob blob-3"></div>
-                    <div className="blob blob-4"></div>
-                    
-                    {/* New oval shapes - matching Solana site */}
-                    <div className="blob-oval blob-oval-horizontal" 
-                        style={{ 
-                            background: '#00FFA3',
-                            top: '15%', 
-                            left: '5%',
-                            animation: 'float-slow 20s ease-in-out infinite'
-                        }}>
-                    </div>
-                    
-                    <div className="blob-oval blob-oval-vertical" 
-                        style={{ 
-                            background: '#9945FF',
-                            bottom: '10%', 
-                            right: '8%',
-                            animation: 'float-medium 18s ease-in-out infinite'
-                        }}>
-                    </div>
-                    
-                    {/* Pill shape */}
-                    <div className="blob-oval blob-pill" 
-                        style={{ 
-                            background: '#E40F91',
-                            top: '70%', 
-                            left: '15%',
-                            animation: 'float-fast 15s ease-in-out infinite'
-                        }}>
-                    </div>
-                    
-                    {/* Small glowing circle */}
-                    <div className="blob-small-circle glow" 
-                        style={{ 
-                            background: '#00FFA3',
-                            top: '35%', 
-                            left: '60%',
-                            animation: 'pulse 8s ease-in-out infinite'
-                        }}>
-                    </div>
-                    
-                    {/* Ring shape */}
-                    <div className="blob-ring" 
-                        style={{ 
-                            borderColor: '#00FFA3',
-                            top: '20%', 
-                            right: '20%',
-                            animation: 'rotate-slow 30s linear infinite'
-                        }}>
-                    </div>
-                    
-                    {/* Small accent circle */}
-                    <div className="blob-small-circle" 
-                        style={{ 
-                            background: '#FFFFFF',
-                            bottom: '40%', 
-                            left: '48%',
-                            width: '4px',
-                            height: '4px',
-                            filter: 'blur(2px)',
-                            opacity: '0.7'
-                        }}>
-                    </div>
+        <div className="dashboard-container">
+            {/* Animated Background */}
+            <div className="animated-background">
+                {/* Original circular blobs */}
+                <div className="blob blob-1"></div>
+                <div className="blob blob-2"></div>
+                <div className="blob blob-3"></div>
+                <div className="blob blob-4"></div>
+                
+                {/* New oval shapes - matching Solana site */}
+                <div className="blob-oval blob-oval-horizontal" 
+                    style={{ 
+                        background: '#00FFA3',
+                        top: '15%', 
+                        left: '5%',
+                        animation: 'float-slow 20s ease-in-out infinite'
+                    }}>
                 </div>
-                <div className="main-content">
-                    <div className="cards-grid">
-                        <Card
-                            type="nfts"
-                            isActive={activeSection === "nfts"}
-                            onClick={() => setActiveSection("nfts")}
-                        />
-                        <Card
-                            type="network"
-                            isActive={activeSection === "network"}
-                            onClick={() => setActiveSection("network")}
-                        />
-                        <Card
-                            type="sentiment"
-                            isActive={activeSection === "sentiment"}
-                            onClick={() => setActiveSection("sentiment")}
-                        />
-                    </div>
-
-                    <div className="dynamic-content">
-                        {renderActiveContent()}
-                    </div>
+                
+                <div className="blob-oval blob-oval-vertical" 
+                    style={{ 
+                        background: '#9945FF',
+                        bottom: '10%', 
+                        right: '8%',
+                        animation: 'float-medium 18s ease-in-out infinite'
+                    }}>
+                </div>
+                
+                {/* Pill shape */}
+                <div className="blob-oval blob-pill" 
+                    style={{ 
+                        background: '#E40F91',
+                        top: '70%', 
+                        left: '15%',
+                        animation: 'float-fast 15s ease-in-out infinite'
+                    }}>
+                </div>
+                
+                {/* Small glowing circle */}
+                <div className="blob-small-circle glow" 
+                    style={{ 
+                        background: '#00FFA3',
+                        top: '35%', 
+                        left: '60%',
+                        animation: 'pulse 8s ease-in-out infinite'
+                    }}>
+                </div>
+                
+                {/* Ring shape */}
+                <div className="blob-ring" 
+                    style={{ 
+                        borderColor: '#00FFA3',
+                        top: '20%', 
+                        right: '20%',
+                        animation: 'rotate-slow 30s linear infinite'
+                    }}>
+                </div>
+                
+                {/* Small accent circle */}
+                <div className="blob-small-circle" 
+                    style={{ 
+                        background: '#FFFFFF',
+                        bottom: '40%', 
+                        left: '48%',
+                        width: '4px',
+                        height: '4px',
+                        filter: 'blur(2px)',
+                        opacity: '0.7'
+                    }}>
                 </div>
             </div>
-        </>
+            <div className="main-content">
+                <div className="cards-grid">
+                    <Card
+                        type="nfts"
+                        isActive={activeSection === "nfts"}
+                        onClick={() => setActiveSection("nfts")}
+                    />
+                    <Card
+                        type="network"
+                        isActive={activeSection === "network"}
+                        onClick={() => setActiveSection("network")}
+                    />
+                    <Card
+                        type="sentiment"
+                        isActive={activeSection === "sentiment"}
+                        onClick={() => setActiveSection("sentiment")}
+                    />
+                </div>
+
+                <div className="dynamic-content">
+                    {renderActiveContent()}
+                </div>
+            </div>
+        </div>
     );
 };
 
