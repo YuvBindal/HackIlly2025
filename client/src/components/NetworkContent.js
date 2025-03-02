@@ -27,7 +27,20 @@ ChartJS.register(
   Filler
 );
 
-const NetworkContent = () => {
+// Function to export networkStats directly for other components to use
+export const getNetworkStatsState = () => {
+  return networkStatsStore;
+};
+
+// Store for keeping network stats accessible outside the component
+let networkStatsStore = {
+  tps: "2,450",
+  blockchain: "Solana",
+  congestionLevel: "Unknown",
+  failurePercentage: "Unknown"
+};
+
+const NetworkContent = ({ onNetworkStatsUpdate }) => {
     const [tradingData, setTradingData] = useState(null);
     const [mintingData, setMintingData] = useState(null);
     const [transactionData, setTransactionData] = useState(null);
@@ -80,7 +93,15 @@ const NetworkContent = () => {
         mintingDataRef.current = mintingData;
         transactionDataRef.current = transactionData;
         networkStatsRef.current = networkStats;
-    }, [tradingData, mintingData, transactionData, networkStats]);
+        
+        // Update the globally accessible store when networkStats changes
+        networkStatsStore = networkStats;
+        
+        // Call the callback if provided
+        if (onNetworkStatsUpdate && typeof onNetworkStatsUpdate === 'function') {
+            onNetworkStatsUpdate(networkStats);
+        }
+    }, [tradingData, mintingData, transactionData, networkStats, onNetworkStatsUpdate]);
 
     // Calculate trends when data changes
     useEffect(() => {
@@ -118,7 +139,7 @@ const NetworkContent = () => {
         setPreviousMintingData(mintingData);
         setPreviousTransactionData(transactionData);
         
-    }, [tradingData, mintingData, transactionData]);
+    }, [tradingData, mintingData, transactionData, previousTradingData, previousMintingData, previousTransactionData]);
 
     const toggleSection = (section) => {
         setExpandedSections(prev => ({
@@ -258,8 +279,6 @@ const NetworkContent = () => {
         const dataIntervalId = setInterval(() => {
             fetchAllData();
         }, 5000);
-        
-   
         
         // Clean up intervals on unmount
         return () => {

@@ -1,23 +1,31 @@
+import os
+import pickle
+import sys
+from pathlib import Path
+
+import pandas as pd
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import sys
-import os
-from pathlib import Path
-import pandas as pd
-import pickle
+
 print("Python executable:", sys.executable)
 
 
 import numpy as np
+
 # Add the parent directory to Python path
 current_dir = Path(__file__).resolve().parent
 parent_dir = str(current_dir.parent)
 sys.path.append(parent_dir)
 
-from backend.tps_nft_data import get_tps
-from backend.failed_transactions import get_transaction_fees_and_failure_df, get_minting_activity_query_by_minutes, get_trading_activity_query_by_hours 
-from backend.agents.nft_recommendation.market_nft_trends import main  
 from datetime import datetime
+
+from backend.agents.nft_recommendation.market_nft_trends import main
+from backend.failed_transactions import (
+    get_minting_activity_query_by_minutes,
+    get_trading_activity_query_by_hours,
+    get_transaction_fees_and_failure_df,
+)
+from backend.tps_nft_data import get_tps
 
 app = FastAPI()
 
@@ -216,6 +224,9 @@ async def get_predicted_congestion():
             
         # Get the last row as a dictionary
         last_row = congestion_df.tail(1).to_dict(orient='records')[0]
+
+        #Call predict congestion to propogate calls
+        await predict_congestion()
         
         return {
             'status': 'success',
@@ -277,7 +288,7 @@ async def predict_congestion():
         print(failure_percentage)
         
         # Add some randomness to the failure percentage for visual interest
-        final_failure_percentage = max(0, random.randint(0+failure_percentage, 20+failure_percentage))
+        final_failure_percentage = max(0, random.randint(failure_percentage, 5+failure_percentage))
         
         congestion_level = ""
         if final_failure_percentage >= 0 and final_failure_percentage < 20:
