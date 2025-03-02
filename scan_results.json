@@ -1,0 +1,110 @@
+{
+  "status": "success",
+  "RawCode": "//! A simple program that allows users, DAOs, and multisigs to delay transaction\n//! execution. May be useful in enhancing an application's decentralization\n//! and/or security.\n\nuse anchor_lang::prelude::*;\nuse anchor_lang::solana_program;\nuse anchor_lang::solana_program::instruction::Instruction;\nuse std::convert::Into;\nuse std::ops::Deref;\n#[cfg(not(feature = \"no-entrypoint\"))]\nuse solana_security_txt::security_txt;\n\n#[cfg(not(feature = \"no-entrypoint\"))]\nsecurity_txt! {\n    name: \"solana_timelock\",\n    project_url: \"https://themetadao.org\",\n    contacts: \"email:metaproph3t@protonmail.com\",\n    policy: \"The market will decide whether we pay a bug bounty.\",\n    source_code: \"https://github.com/metaDAOproject/solana-timelock\",\n    source_release: \"v0\",\n    auditors: \"None\",\n    acknowledgements: \"DCF = (CF1 / (1 + r)^1) + (CF2 / (1 + r)^2) + ... (CFn / (1 + r)^n)\"\n}\n\ndeclare_id!(\"tiME1hz9F5C5ZecbvE5z6Msjy8PKfTqo1UuRYXfndKF\");\n\n\n\n#[account]\npub struct Timelock {\n    pub authority: Pubkey,\n    pub signer_bump: u8,\n    pub delay_in_slots: u64,\n}\n\n#[account]\npub struct TransactionBatch {\n    pub status: TransactionBatchStatus,\n    pub transactions: Vec<Transaction>,\n    pub timelock: Pubkey,\n    pub enqueued_slot: u64,\n    pub transaction_batch_authority: Pubkey\n}\n\n#[derive(AnchorSerialize, AnchorDeserialize, Clone)]\npub struct Transaction {\n    pub program_id: Pubkey,\n    pub accounts: Vec<TransactionAccount>,\n    pub data: Vec<u8>,\n    pub did_execute: bool,\n}\n\n#[derive(AnchorSerialize, AnchorDeserialize, Clone)]\npub struct TransactionAccount {\n    pub pubkey: Pubkey,\n    pub is_signer: bool,\n    pub is_writable: bool,\n}\n\n#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Debug)]\npub enum TransactionBatchStatus {\n    Created,\n    Sealed,\n    Enqueued,\n    Cancelled,\n    Executed\n}\n\n#[program]\npub mod solana_timelock {\n    use super::*;\n\n    pub fn create_timelock(\n        ctx: Context<CreateTimelock>,\n        authority: Pubkey,\n        delay_in_slots: u64,\n    ) -> Result<()> {\n        let timelock = &mut ctx.accounts.timelock;\n\n        timelock.authority = authority;\n        timelock.delay_in_slots = delay_in_slots;\n        timelock.signer_bump = ctx.bumps.timelock_signer;\n\n        Ok(())\n    }\n\n    pub fn set_delay_in_slots(ctx: Context<Auth>, delay_in_slots: u64) -> Result<()> {\n        let timelock = &mut ctx.accounts.timelock;\n\n        timelock.delay_in_slots = delay_in_slots;\n\n        Ok(())\n    }\n\n    pub fn set_authority(ctx: Context<Auth>, authority: Pubkey) -> Result<()> {\n        let timelock = &mut ctx.accounts.timelock;\n\n        timelock.authority = authority;\n\n        Ok(())\n    }\n\n    pub fn create_transaction_batch(\n        ctx: Context<CreateTransactionBatch>,\n    ) -> Result<()> {\n        let tx_batch = &mut ctx.accounts.transaction_batch;\n\n        tx_batch.timelock = ctx.accounts.timelock.key();\n        tx_batch.transaction_batch_authority = ctx.accounts.transaction_batch_authority.key();\n        tx_batch.status = TransactionBatchStatus::Created;\n\n        Ok(())\n    }\n\n    pub fn add_transaction(\n        ctx: Context<UpdateTransactionBatch>,\n        program_id: Pubkey,\n        accounts: Vec<TransactionAccount>,\n        data: Vec<u8>\n    ) -> Result<()> {\n        let tx_batch = &mut ctx.accounts.transaction_batch;\n\n        msg!(\"Current transaction batch status: {:?}\", tx_batch.status);\n        require!(tx_batch.status == TransactionBatchStatus::Created, TimelockError::CannotAddTransactions);\n\n        let this_transaction = Transaction {\n            program_id,\n            accounts,\n            data,\n            did_execute: false\n        };\n\n        tx_batch.transactions.push(this_transaction);\n\n        Ok(())\n    }\n\n    pub fn seal_transaction_batch(\n        ctx: Context<UpdateTransactionBatch>\n    ) -> Result<()> {\n        let tx_batch = &mut ctx.accounts.transaction_batch;\n\n        msg!(\"Current transaction batch status: {:?}\", tx_batch.status);\n        require!(tx_batch.status == TransactionBatchStatus::Created, TimelockError::CannotSealTransactionBatch);\n\n        tx_batch.status = TransactionBatchStatus::Sealed;\n\n        Ok(())\n    }\n\n    pub fn enqueue_transaction_batch(\n        ctx: Context<EnqueueOrCancelTransactionBatch>\n    ) -> Result<()> {\n        let tx_batch = &mut ctx.accounts.transaction_batch;\n        let clock = Clock::get()?;\n\n        msg!(\"Current transaction batch status: {:?}\", tx_batch.status);\n        require!(tx_batch.status == TransactionBatchStatus::Sealed, TimelockError::CannotEnqueueTransactionBatch);\n\n        tx_batch.status = TransactionBatchStatus::Enqueued;\n        tx_batch.enqueued_slot = clock.slot;\n\n        Ok(())\n    }\n\n    pub fn cancel_transaction_batch(\n        ctx: Context<EnqueueOrCancelTransactionBatch>\n    ) -> Result<()> {\n        let tx_batch = &mut ctx.accounts.transaction_batch;\n\n        msg!(\"Current transaction batch status: {:?}\", tx_batch.status);\n        require!(tx_batch.status == TransactionBatchStatus::Enqueued, TimelockError::CannotCancelTimelock);\n\n        let clock = Clock::get()?;\n        let enqueued_slot = tx_batch.enqueued_slot;\n        let required_delay = ctx.accounts.timelock.delay_in_slots;\n        require!(clock.slot - enqueued_slot < required_delay, TimelockError::CanOnlyCancelDuringTimelockPeriod);\n\n        // A fallback option that allows the timelock authority to prevent the\n        // transaction batch from executing by canceling it during the timelock period.\n        tx_batch.status = TransactionBatchStatus::Cancelled;\n\n        Ok(())\n\n    }\n\n    pub fn execute_transaction_batch(ctx: Context<ExecuteTransactionBatch>) -> Result<()> {\n        let tx_batch = &mut ctx.accounts.transaction_batch;\n\n        msg!(\"Current transaction batch status: {:?}\", tx_batch.status);\n        require!(tx_batch.status == TransactionBatchStatus::Enqueued, TimelockError::CannotExecuteTransactions);\n\n        let clock = Clock::get()?;\n        let enqueued_slot = tx_batch.enqueued_slot;\n        let required_delay = ctx.accounts.timelock.delay_in_slots;\n        require!(clock.slot - enqueued_slot > required_delay, TimelockError::NotReady);\n\n        if let Some(transaction) = tx_batch.transactions.iter_mut().find(|tx| !tx.did_execute) {\n            let mut ix: Instruction = transaction.deref().into();\n            for acc in ix.accounts.iter_mut() {\n                if &acc.pubkey == ctx.accounts.timelock_signer.key {\n                    acc.is_signer = true;\n                }\n            }\n            let timelock_key = ctx.accounts.timelock.key();\n            let seeds = &[timelock_key.as_ref(), &[ctx.accounts.timelock.signer_bump]];\n            let signer = &[&seeds[..]];\n            let accounts = ctx.remaining_accounts;\n            solana_program::program::invoke_signed(&ix, accounts, signer)?;\n    \n            transaction.did_execute = true;\n        }\n\n        if tx_batch.transactions.iter().all(|tx| tx.did_execute) {\n            tx_batch.status = TransactionBatchStatus::Executed;\n        }\n\n        Ok(())\n    }\n}\n\n#[derive(Accounts)]\npub struct CreateTimelock<'info> {\n    #[account(\n        seeds = [timelock.key().as_ref()],\n        bump,\n    )]\n    timelock_signer: SystemAccount<'info>, \n    #[account(zero, signer)]\n    timelock: Box<Account<'info, Timelock>>,\n}\n\n#[derive(Accounts)]\npub struct Auth<'info> {\n    #[account(\n        seeds = [timelock.key().as_ref()],\n        bump = timelock.signer_bump,\n    )]\n    timelock_signer: Signer<'info>,\n    #[account(mut)]\n    timelock: Box<Account<'info, Timelock>>,\n}\n\n#[derive(Accounts)]\npub struct CreateTransactionBatch<'info> {\n    transaction_batch_authority: Signer<'info>,\n    timelock: Box<Account<'info, Timelock>>,\n    #[account(zero, signer)]\n    transaction_batch: Box<Account<'info, TransactionBatch>>\n}",
+  "Lines": [
+    [
+      11,
+      "Includes security.txt for transparency and responsible disclosure.",
+      "Good"
+    ],
+    [
+      18,
+      "Policy on bug bounties is vague and may discourage reporting of vulnerabilities.",
+      "Bad"
+    ],
+    [
+      25,
+      "Declare program ID correctly, ensuring proper identification on the blockchain.",
+      "Good"
+    ],
+    [
+      78,
+      "Initializes the timelock correctly with authority and delay.",
+      "Good"
+    ],
+    [
+      124,
+      "Checks the transaction batch status before adding transactions, preventing unauthorized actions.",
+      "Good"
+    ],
+    [
+      146,
+      "Checks the status before sealing the transaction batch, ensuring proper workflow.",
+      "Good"
+    ],
+    [
+      158,
+      "Validates the status before enqueuing the transaction batch, maintaining control over execution.",
+      "Good"
+    ],
+    [
+      176,
+      "Validates the delay before allowing cancellation, enforcing the timelock period.",
+      "Good"
+    ],
+    [
+      191,
+      "Ensures the transaction batch is in the correct state before execution.",
+      "Good"
+    ],
+    [
+      196,
+      "Condition for executing transactions checks if the required delay has passed, but could be improved to prevent time manipulation.",
+      "Bad"
+    ],
+    [
+      201,
+      "Directly checks the public key for signer authorization which could lead to security issues if not handled properly.",
+      "Bad"
+    ],
+    [
+      209,
+      "Uses invoke_signed to ensure that the transaction is executed with the correct signer.",
+      "Good"
+    ],
+    [
+      214,
+      "Updates the transaction batch status correctly after all transactions are executed.",
+      "Good"
+    ],
+    [
+      228,
+      "Uses seeds and bumps for signer accounts, enhancing security against unauthorized access.",
+      "Good"
+    ],
+    [
+      239,
+      "Ensures that the signer is validated using the correct bump seed.",
+      "Good"
+    ],
+    [
+      248,
+      "Ensures that the transaction batch is initialized correctly as a zeroed account.",
+      "Good"
+    ],
+    [
+      250,
+      "Ensures that only authorized accounts can create transaction batches.",
+      "Good"
+    ],
+    [
+      172,
+      "The cancellation logic could allow for a race condition if multiple transactions are being processed.",
+      "Bad"
+    ],
+    [
+      177,
+      "The current logic does not account for potential re-entrancy attacks during cancellation.",
+      "Bad"
+    ]
+  ],
+  "Report": "\n# Security Scan Report for https://github.com/metaDAOproject/solana-timelock/tree/1a6d1e2dff20fbd46fb1209709c9a496d92f927d\n\nThe code demonstrates a solid structure for managing transaction delays and authority checks, which is crucial for a timelock mechanism. However, there are several areas of concern, particularly regarding vague policies on bug bounties, potential race conditions, and direct public key checks that could be exploited. Recommendations include improving the clarity of security policies, enhancing validation checks to prevent time manipulation, and implementing more robust authorization mechanisms to safeguard against unauthorized access.\n\n## Metadata\n- Repository URL: https://github.com/metaDAOproject/solana-timelock/tree/1a6d1e2dff20fbd46fb1209709c9a496d92f927d\n- Analyzed File: programs/solana_timelock/src/lib.rs\n- Analysis Time: 7.79 seconds\n- Analysis Date: 2025-03-01 23:33:52\n",
+  "metadata": {
+    "repository_url": "https://github.com/metaDAOproject/solana-timelock/tree/1a6d1e2dff20fbd46fb1209709c9a496d92f927d",
+    "analyzed_file": "programs/solana_timelock/src/lib.rs",
+    "analysis_time": 7.786585092544556,
+    "llm_provider": "openai",
+    "model_name": "gpt-4o-mini",
+    "llm_api_calls": 2
+  }
+}

@@ -183,7 +183,7 @@ For example:
   [37, "good", "Correctly checks for signer authorization"]
 ]
 
-After the line-by-line analysis, provide a summary of the overall security posture of the code.
+After the line-by-line analysis, provide a summary of the overall security posture of the code, which would include overview, vulnerabilities and recommendations.
 Format your response as follows:
 
 ```json

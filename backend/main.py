@@ -763,34 +763,92 @@ def create_fallback_descriptions(repo_structure):
 
 @app.post('/api/scan')
 async def scan_code(request: ScanRequest = Body(...)):
+    from backend.llm_analyzer.testing import analyze_repository_line_by_line
+    import time
+    
     github_url = request.githubUrl
-
-    # Mock successful scan response
-    # In a real application, you would analyze the GitHub repository
-    return {
-        "status": "success",
-        "RawCode": MOCK_CODE,
-        "Lines": MOCK_SECURITY_ISSUES,
-        "Report": f"""
+    
+    try:
+        print(f"Starting security analysis for repository: {github_url}")
+        
+        # Use the analyze_repository_line_by_line function from testing.py
+        # This function already handles all the steps: repository structure fetching,
+        # file selection, content retrieval, and line-by-line analysis
+        analysis_results = analyze_repository_line_by_line(
+            repo_url=github_url,
+            llm_provider="openai",
+            model_name="gpt-4o-mini"
+        )
+        
+        if "error" in analysis_results:
+            raise ValueError(analysis_results["error"])
+        
+        # Extract the raw code from the selected file
+        selected_file = analysis_results["metadata"]["analyzed_file"]
+        raw_code = ""
+        try:
+            # We need to re-fetch the file content since it's not stored in the results
+            from backend.github_fetcher.github_fetcher import GitHubFetcher
+            github_fetcher = GitHubFetcher()
+            raw_code = github_fetcher.read_file(github_url, selected_file)
+            # Limit to first 250 lines to match what was analyzed
+            raw_code = "\n".join(raw_code.split("\n")[:250])
+        except Exception as e:
+            print(f"Warning: Could not fetch raw code: {str(e)}")
+            # If we can't fetch the raw code, we'll return an empty string
+        
+        # Reformat the lines from [line_number, "good"/"bad", "explanation"]
+        # to [line_number, "explanation", "Good"/"Bad"]
+        reformatted_lines = []
+        for line_info in analysis_results.get("lines", []):
+            if len(line_info) >= 3:
+                line_num, assessment, explanation = line_info
+                # Capitalize the assessment and move it to the third position
+                reformatted_lines.append([line_num, explanation, assessment.capitalize()])
+        
+        # Generate a report based on the analysis results
+        summary = analysis_results.get("summary", "No summary available")
+        
+        report = f"""
 # Security Scan Report for {github_url}
 
-## Overview
-The security scan identified several critical issues in the codebase that need attention.
+{summary}
 
-## Vulnerability Summary
-- **Missing Ownership Verification**: The code doesn't verify if the accounts are owned by the program.
-- **Inadequate Authority Checks**: Authority signature verification is missing or commented out.
-- **Unsafe Arithmetic**: Potential integer overflow vulnerabilities found.
+## Metadata
+- Repository URL: {github_url}
+- Analyzed File: {selected_file}
+- Analysis Time: {analysis_results["metadata"]["analysis_time"]:.2f} seconds
+- Analysis Date: {time.strftime("%Y-%m-%d %H:%M:%S")}
+"""
+        
+        return {
+            "status": "success",
+            "RawCode": raw_code,
+            "Lines": reformatted_lines,
+            "Report": report,
+            "metadata": analysis_results["metadata"]
+        }
+        
+    except Exception as e:
+        print(f"Error in security analysis: {str(e)}")
+        return {
+            "status": "error",
+            "message": str(e),
+            "RawCode": MOCK_CODE,  # Fallback to mock data in case of error
+            "Lines": MOCK_SECURITY_ISSUES,
+            "Report": f"""
+# Security Scan Error
+
+## Error Details
+An error occurred during the security scan: {str(e)}
+
+## Fallback Response
+This is a mock response provided as a fallback. In a production environment, you would see actual analysis results here.
 
 ## Recommendations
-1. Always verify program ownership of accounts
-2. Implement proper authority checks
-3. Use checked arithmetic operations (checked_add, checked_sub)
-4. Add proper error handling for all operations
-5. Follow Solana security best practices for all privileged operations
-
-## Secure Implementation
-A secure implementation example is provided in the `process_transfer_secure` function.
+1. Check that the GitHub URL is correct and accessible
+2. Ensure the repository contains Solana program code
+3. Try again later or contact support if the issue persists
 """
-    }
+        }
 
