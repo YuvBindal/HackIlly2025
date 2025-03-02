@@ -111,7 +111,7 @@ class SolanaSecurityAnalyzer:
                         {"role": "user", "content": prompt}
                     ],
                     max_tokens=max_tokens,
-                    temperature=0.2,  # Lower temperature for more deterministic responses
+                    temperature=0.5,  # Lower temperature for more deterministic responses
                 )
                 
                 # Extract the response text
