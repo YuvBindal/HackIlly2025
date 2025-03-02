@@ -10,6 +10,7 @@ const Navbar = ({ handleLogout }) => {
     // Navigation handlers
     const goToDashboard = () => navigate("/dashboard");
     const goToScheduler = () => navigate("/scheduler");
+    const goToSecureScan = () => navigate("/securescan");
 
     return (
         <nav className="navbar">
@@ -29,6 +30,7 @@ const Navbar = ({ handleLogout }) => {
                     <ul className="nav-links">
                         <li className="nav-item" onClick={goToDashboard}>Dashboard</li>
                         <li className="nav-item" onClick={goToScheduler}>Scheduler</li>
+                        <li className="nav-item" onClick={goToSecureScan}>SolScan</li>
                     </ul>
                 </div>
 

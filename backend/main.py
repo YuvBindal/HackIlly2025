@@ -9,8 +9,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 print("Python executable:", sys.executable)
 
+import json
+import random
 
 import numpy as np
+from fastapi import Body, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 # Add the parent directory to Python path
 current_dir = Path(__file__).resolve().parent
@@ -357,5 +362,238 @@ async def get_news_information():
     return {
         "status": "success",
         "data": news_lines
+    }
+
+
+
+
+
+class ProgramIdRequest(BaseModel):
+    programId: str
+
+class ScanRequest(BaseModel):
+    githubUrl: str
+
+# Mock repository structures for different program IDs
+MOCK_REPO_STRUCTURES = {
+    "default": {
+        "src": {
+            "lib.rs": "Main library file",
+            "utils": {
+                "math.rs": "Math utility functions",
+                "validation.rs": "Input validation functions"
+            },
+            "instructions": {
+                "initialize.rs": "Program initialization logic",
+                "process.rs": "Transaction processing logic"
+            }
+        },
+        "tests": {
+            "integration_tests.rs": "Integration tests",
+            "unit_tests.rs": "Unit tests"
+        },
+        "Cargo.toml": "Rust package manifest"
+    },
+    "TokenProgram123": {
+        "src": {
+            "lib.rs": "Main token program entry point",
+            "state.rs": "Program state definitions",
+            "instructions": {
+                "mint.rs": "Token minting logic",
+                "transfer.rs": "Token transfer logic",
+                "burn.rs": "Token burning logic"
+            },
+            "utils": {
+                "validation.rs": "Token validation utilities",
+                "math.rs": "Safe math operations"
+            }
+        },
+        "tests": {
+            "mint_tests.rs": "Mint functionality tests",
+            "transfer_tests.rs": "Transfer functionality tests",
+            "burn_tests.rs": "Burn functionality tests"
+        },
+        "Cargo.toml": "Rust package manifest",
+        "Xargo.toml": "Solana program configuration"
+    }
+}
+
+# Mock code for security scanning
+MOCK_CODE = """// Token transfer function with potential vulnerabilities
+pub fn process_transfer(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    amount: u64,
+) -> ProgramResult {
+    let account_info_iter = &mut accounts.iter();
+
+    // Get accounts
+    let source_info = next_account_info(account_info_iter)?;
+    let destination_info = next_account_info(account_info_iter)?;
+    let authority_info = next_account_info(account_info_iter)?;
+
+    // SECURITY ISSUE: No check if program_id owns the token accounts
+
+    // Check if source account has enough tokens
+    let mut source_data = source_info.try_borrow_mut_data()?;
+    let mut source_account = TokenAccount::unpack(&source_data)?;
+
+    if source_account.amount < amount {
+        return Err(TokenError::InsufficientFunds.into());
+    }
+
+    // SECURITY ISSUE: Missing authority signature verification
+    // if !authority_info.is_signer {
+    //     return Err(ProgramError::MissingRequiredSignature);
+    // }
+
+    // SECURITY ISSUE: No check if the authority is actually authorized
+
+    // Perform transfer
+    source_account.amount = source_account.amount.checked_sub(amount)
+        .ok_or(TokenError::Overflow)?;
+
+    let mut destination_data = destination_info.try_borrow_mut_data()?;
+    let mut destination_account = TokenAccount::unpack(&destination_data)?;
+
+    // SECURITY ISSUE: Potential overflow not properly checked
+    destination_account.amount += amount;
+
+    // Repack accounts
+    TokenAccount::pack(source_account, &mut source_data)?;
+    TokenAccount::pack(destination_account, &mut destination_data)?;
+
+    // Log the transfer
+    msg!("Transfer {} tokens from {} to {}",
+        amount,
+        source_info.key,
+        destination_info.key
+    );
+
+    Ok(())
+}
+
+// Secure implementation of token transfer
+pub fn process_transfer_secure(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    amount: u64,
+) -> ProgramResult {
+    let account_info_iter = &mut accounts.iter();
+
+    // Get accounts
+    let source_info = next_account_info(account_info_iter)?;
+    let destination_info = next_account_info(account_info_iter)?;
+    let authority_info = next_account_info(account_info_iter)?;
+
+    // Verify program ownership
+    if source_info.owner != program_id || destination_info.owner != program_id {
+        return Err(ProgramError::IncorrectProgramId);
+    }
+
+    // Verify authority is a signer
+    if !authority_info.is_signer {
+        return Err(ProgramError::MissingRequiredSignature);
+    }
+
+    // Check if source account has enough tokens
+    let mut source_data = source_info.try_borrow_mut_data()?;
+    let mut source_account = TokenAccount::unpack(&source_data)?;
+
+    // Verify authority is allowed to transfer from source
+    if !source_account.is_authority(authority_info.key) {
+        return Err(TokenError::OwnerMismatch.into());
+    }
+
+    if source_account.amount < amount {
+        return Err(TokenError::InsufficientFunds.into());
+    }
+
+    // Perform transfer with safe math
+    source_account.amount = source_account.amount.checked_sub(amount)
+        .ok_or(TokenError::Overflow)?;
+
+    let mut destination_data = destination_info.try_borrow_mut_data()?;
+    let mut destination_account = TokenAccount::unpack(&destination_data)?;
+
+    destination_account.amount = destination_account.amount.checked_add(amount)
+        .ok_or(TokenError::Overflow)?;
+
+    // Repack accounts
+    TokenAccount::pack(source_account, &mut source_data)?;
+    TokenAccount::pack(destination_account, &mut destination_data)?;
+
+    // Log the transfer
+    msg!("Transfer {} tokens from {} to {}",
+        amount,
+        source_info.key,
+        destination_info.key
+    );
+
+    Ok(())
+}"""
+
+# Mock security issues
+MOCK_SECURITY_ISSUES = [
+    (6, "Missing program ID ownership verification", "Bad"),
+    (18, "Missing authority signature verification (commented out)", "Bad"),
+    (21, "No verification if authority is authorized for this account", "Bad"),
+    (29, "Potential integer overflow - using += without checked_add", "Bad"),
+    (58, "Proper program ownership verification", "Good"),
+    (63, "Correct authority signature verification", "Good"),
+    (74, "Proper authority verification against source account", "Good"),
+    (83, "Safe arithmetic with checked_sub", "Good"),
+    (88, "Safe arithmetic with checked_add", "Good")
+]
+
+@app.post('/api/validate-program')
+async def validate_program_id(request: ProgramIdRequest = Body(...)):
+    program_id = request.programId
+
+    # For testing purposes, some program IDs will be "valid" and others "invalid"
+    # You could implement specific logic based on program ID formats if needed
+    is_valid = len(program_id) > 5 and not program_id.startswith("invalid")
+
+    # Select repo structure based on program ID or use default
+    repo_structure = MOCK_REPO_STRUCTURES.get(program_id, MOCK_REPO_STRUCTURES["default"])
+
+    # Return mock response
+    return {
+        "status": "success" if is_valid else "error",
+        "validated": is_valid,
+        "RepoStructure": json.dumps(repo_structure, indent=2) if is_valid else ""
+    }
+
+@app.post('/api/scan')
+async def scan_code(request: ScanRequest = Body(...)):
+    github_url = request.githubUrl
+
+    # Mock successful scan response
+    # In a real application, you would analyze the GitHub repository
+    return {
+        "status": "success",
+        "RawCode": MOCK_CODE,
+        "Lines": MOCK_SECURITY_ISSUES,
+        "Report": f"""
+# Security Scan Report for {github_url}
+
+## Overview
+The security scan identified several critical issues in the codebase that need attention.
+
+## Vulnerability Summary
+- **Missing Ownership Verification**: The code doesn't verify if the accounts are owned by the program.
+- **Inadequate Authority Checks**: Authority signature verification is missing or commented out.
+- **Unsafe Arithmetic**: Potential integer overflow vulnerabilities found.
+
+## Recommendations
+1. Always verify program ownership of accounts
+2. Implement proper authority checks
+3. Use checked arithmetic operations (checked_add, checked_sub)
+4. Add proper error handling for all operations
+5. Follow Solana security best practices for all privileged operations
+
+## Secure Implementation
+A secure implementation example is provided in the `process_transfer_secure` function.
+"""
     }
 

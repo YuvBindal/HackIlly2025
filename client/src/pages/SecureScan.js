@@ -27,7 +27,7 @@ const SecureScan = () => {
     setValidationResult(null);
     
     try {
-      const response = await fetch('YOUR_BACKEND_API_URL/validate', {
+      const response = await fetch('http://localhost:8000/api/validate-program', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ const SecureScan = () => {
     setCurrentStreamingLine(0);
     
     try {
-      const response = await fetch('YOUR_BACKEND_API_URL/scan', {
+      const response = await fetch('http://localhost:8000/api/scan', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
