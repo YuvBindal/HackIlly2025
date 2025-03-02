@@ -554,17 +554,22 @@ async def validate_program_id(request: ProgramIdRequest = Body(...)):
     from backend.llm_analyzer.security_analyzer import SolanaSecurityAnalyzer
     
     program_id = request.programId
+    repo_url = None
     
     try:
         # Step 1: Verify the program ID with osec.io
         verification_url = f"https://verify.osec.io/status/{program_id}"
         verification_response = requests.get(verification_url)
         
+        print("Response From osec.io:")
+        print(verification_response.json())
+        
         if verification_response.status_code != 200:
             return {
                 "status": "error",
                 "validated": False,
-                "RepoStructure": ""
+                "RepoStructure": "",
+                "repoUrl": repo_url
             }
         
         verification_data = verification_response.json()
@@ -572,9 +577,10 @@ async def validate_program_id(request: ProgramIdRequest = Body(...)):
         
         if not is_verified:
             return {
-                "status": "error",
+                "status": "success",
                 "validated": False,
-                "RepoStructure": ""
+                "RepoStructure": "",
+                "repoUrl": repo_url
             }
         
         # Step 2: Get the repository URL from the verification response
@@ -584,7 +590,8 @@ async def validate_program_id(request: ProgramIdRequest = Body(...)):
                 "status": "error",
                 "validated": False,
                 "message": "Repository URL not found in verification data",
-                "RepoStructure": ""
+                "RepoStructure": "",
+                "repoUrl": repo_url
             }
         
         # Step 3: Initialize the GitHub fetcher and get the repository structure
@@ -608,7 +615,8 @@ async def validate_program_id(request: ProgramIdRequest = Body(...)):
             "status": "error",
             "validated": False,
             "message": str(e),
-            "RepoStructure": ""
+            "RepoStructure": "",
+            "repoUrl": repo_url
         }
 
 async def generate_file_descriptions(repo_structure, analyzer, repo_url):

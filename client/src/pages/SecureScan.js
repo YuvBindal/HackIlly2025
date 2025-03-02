@@ -5,7 +5,6 @@ import './SecureScan.css';
 const SecureScan = () => {
   // State management
   const [programId, setProgramId] = useState('');
-  const [githubUrl, setGithubUrl] = useState('');
   const [validationResult, setValidationResult] = useState(null);
   const [securityScanResult, setSecurityScanResult] = useState(null);
   const [isValidating, setIsValidating] = useState(false);
@@ -18,13 +17,13 @@ const SecureScan = () => {
 
   // Form handlers
   const handleProgramIdChange = (e) => setProgramId(e.target.value);
-  const handleGithubUrlChange = (e) => setGithubUrl(e.target.value);
 
   const handleValidateProgram = async () => {
     if (!programId) return;
     
     setIsValidating(true);
     setValidationResult(null);
+    setSecurityScanResult(null); // Reset scan results when validating a new program
     
     try {
       const response = await fetch('http://localhost:8000/api/validate-program', {
@@ -50,7 +49,7 @@ const SecureScan = () => {
   };
 
   const handleSecurityScan = async () => {
-    if (!githubUrl || !validationResult?.validated) return;
+    if (!validationResult?.validated || !validationResult?.repoUrl) return;
     
     setIsScanning(true);
     setSecurityScanResult(null);
@@ -63,7 +62,7 @@ const SecureScan = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ githubUrl }),
+        body: JSON.stringify({ githubUrl: validationResult.repoUrl }),
       });
       
       const data = await response.json();
@@ -107,6 +106,14 @@ const SecureScan = () => {
     }, 50); // Adjust speed as needed
   };
 
+  // Reset function to start over
+  const handleReset = () => {
+    setProgramId('');
+    setValidationResult(null);
+    setSecurityScanResult(null);
+    setDisplayedCode([]);
+  };
+
   // Main component render
   return (
     <div className="secure-scan-container">
@@ -117,7 +124,7 @@ const SecureScan = () => {
       
       {/* Program ID Validation Section */}
       <div className="scan-section program-validation">
-        <h2>Step 1: Validate Program ID</h2>
+        <h2>Validate & Scan Solana Program</h2>
         <div className="input-group">
           <input
             type="text"
@@ -133,6 +140,15 @@ const SecureScan = () => {
           >
             <FaSearch /> Validate
           </button>
+          {validationResult && (
+            <button 
+              className="reset-btn"
+              onClick={handleReset}
+              disabled={isValidating || isScanning}
+            >
+              Reset
+            </button>
+          )}
         </div>
         
         {isValidating && (
@@ -144,89 +160,92 @@ const SecureScan = () => {
         
         {validationResult && (
           <div className={`validation-result ${validationResult.validated ? 'success' : 'error'}`}>
-            <h3>{validationResult.validated ? 'Program Validated' : 'Validation Failed'}</h3>
+            <h3>
+              {validationResult.validated 
+                ? 'Program Validated' 
+                : validationResult.status === 'success' 
+                  ? 'Program Not Validated (as per osec.io)' 
+                  : 'Validation Failed'}
+            </h3>
             {validationResult.validated && (
               <div className="repo-structure">
                 <h4>Repository Structure:</h4>
                 <pre>{validationResult.RepoStructure}</pre>
               </div>
             )}
+            {!validationResult.validated && validationResult.message && (
+              <p className="validation-message">{validationResult.message}</p>
+            )}
           </div>
         )}
       </div>
 
-      {/* Security Scan Section */}
-      <div className={`scan-section security-scan ${!validationResult?.validated ? 'disabled' : ''}`}>
-        <h2>Step 2: Conduct Security Scan</h2>
-        <div className="input-group">
-          <input
-            type="text"
-            value={githubUrl}
-            onChange={handleGithubUrlChange}
-            placeholder="Enter GitHub Repository URL"
-            disabled={!validationResult?.validated || isScanning}
-          />
-          <button 
-            className="scan-btn"
-            onClick={handleSecurityScan}
-            disabled={!validationResult?.validated || !githubUrl || isScanning}
-          >
-            <FaShieldAlt /> Scan Code
-          </button>
+      {/* Security Scan Section - Only shown when program is validated */}
+      {validationResult?.validated && (
+        <div className="scan-section security-scan">
+          <div className="scan-button-container">
+            <button 
+              className="scan-btn"
+              onClick={handleSecurityScan}
+              disabled={isScanning}
+            >
+              <FaShieldAlt /> Scan Code for Vulnerabilities
+            </button>
+          </div>
+          
+          {isScanning && (
+            <div className="loading-indicator">
+              <div className="spinner"></div>
+              <p>Scanning repository for vulnerabilities...</p>
+            </div>
+          )}
+          
+          {securityScanResult && (
+            <div className="scan-results">
+              <h3>Security Scan Results</h3>
+              
+              <div className="code-display">
+                <h4>Code Analysis:</h4>
+                <div className="code-container" ref={codeContainerRef}>
+                  {displayedCode.map((line, index) => (
+                    <pre 
+                      key={index} 
+                      className={`code-line ${
+                        securityScanResult.Lines.find(l => l[0] === index+1)
+                          ? securityScanResult.Lines.find(l => l[0] === index+1)[2] === 'Good' 
+                            ? 'good-line' 
+                            : 'bad-line'
+                          : ''
+                      }`}
+                    >
+                      <span className="line-number">{index + 1}</span>
+                      <span className="line-content">{line}</span>
+                    </pre>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="issues-list">
+                <h4>Identified Issues:</h4>
+                <ul>
+                  {securityScanResult.Lines.filter(line => line[2] === 'Bad').map((line, index) => (
+                    <li key={index} className="issue-item">
+                      <span className="line-ref">Line {line[0]}:</span> {line[1]}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="security-report">
+                <h4>Security Report:</h4>
+                <div className="report-content">
+                  {securityScanResult.Report}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        
-        {isScanning && (
-          <div className="loading-indicator">
-            <div className="spinner"></div>
-            <p>Scanning repository for vulnerabilities...</p>
-          </div>
-        )}
-        
-        {securityScanResult && (
-          <div className="scan-results">
-            <h3>Security Scan Results</h3>
-            
-            <div className="code-display">
-              <h4>Code Analysis:</h4>
-              <div className="code-container" ref={codeContainerRef}>
-                {displayedCode.map((line, index) => (
-                  <pre 
-                    key={index} 
-                    className={`code-line ${
-                      securityScanResult.Lines.find(l => l[0] === index+1)
-                        ? securityScanResult.Lines.find(l => l[0] === index+1)[2] === 'Good' 
-                          ? 'good-line' 
-                          : 'bad-line'
-                        : ''
-                    }`}
-                  >
-                    <span className="line-number">{index + 1}</span>
-                    <span className="line-content">{line}</span>
-                  </pre>
-                ))}
-              </div>
-            </div>
-            
-            <div className="issues-list">
-              <h4>Identified Issues:</h4>
-              <ul>
-                {securityScanResult.Lines.filter(line => line[2] === 'Bad').map((line, index) => (
-                  <li key={index} className="issue-item">
-                    <span className="line-ref">Line {line[0]}:</span> {line[1]}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <div className="security-report">
-              <h4>Security Report:</h4>
-              <div className="report-content">
-                {securityScanResult.Report}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 };
