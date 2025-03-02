@@ -1146,7 +1146,7 @@ function EnhancedSolanaWallet() {
                       id="max-failure-rate"
                       type="range"
                       min="0"
-                      max="20"
+                      max="50"
                       step="0.5"
                       value={maxFailureRate}
                       onChange={(e) => setMaxFailureRate(parseFloat(e.target.value))}

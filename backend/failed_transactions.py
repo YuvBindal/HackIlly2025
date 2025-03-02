@@ -1,3 +1,4 @@
+import json
 import os
 import time
 from datetime import datetime, timedelta
@@ -5,6 +6,9 @@ from functools import reduce
 
 import pandas as pd
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 #Using this to get -> Failed Transactions and Fees data on Solana
 
@@ -43,15 +47,10 @@ class DuneAnalytics:
                 
             time.sleep(1)
 
-def analyze_transaction_fees(query_id=4688078):
+def analyze_transaction_fees(query_id):
     # Initialize Dune Analytics client
-    api_key = "fGgq2c7rz24Gev32VY3wdctdo1tQNIro"
+    api_key = '87fJDuUYzpeLYJ2XWKHzIYNKu1xNJyjS'
     dune = DuneAnalytics(api_key)
-
-    # Let's use a query that gets transaction fee data for the last hour
-    # You'll need to create this query in Dune and get its ID
-    # For now, I'll use a sample query ID (you'll need to replace this)
-    # query_id = "4688078"  # This is a sample query ID
 
     try:
         # Get results
@@ -60,17 +59,59 @@ def analyze_transaction_fees(query_id=4688078):
         # Convert to DataFrame
         df = pd.DataFrame(results)
         print(df)
+        
         # Basic fee analysis
-        if not df.empty:            
-            # Read existing data
-            current_df = pd.read_csv(f'./metrics_cache/{query_id}.csv')
-            current_df['blockchain'] = 'solana'
-            # Concatenate and save the result to a new variable
-            combined_df = pd.concat([current_df, df])
+        if not df.empty:
+            file_path = f'./metrics_cache/{query_id}.csv'
+            
+            # Check if the file exists
+            if os.path.exists(file_path):
+                # Read existing data
+                current_df = pd.read_csv(file_path)
+                # Concatenate with new data
+                combined_df = pd.concat([current_df, df])
+                print(f"Appending to existing file: {file_path}")
+            else:
+                # If file doesn't exist, just use the new data
+                combined_df = df
+                # Ensure the directory exists
+                os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                print(f"Creating new file: {file_path}")
+            
+            # Convert minute column to datetime if it exists and is not already datetime
+            for col in combined_df.columns:
+                if 'minute' in col.lower() or 'time' in col.lower() or 'date' in col.lower():
+                    try:
+                        if not pd.api.types.is_datetime64_any_dtype(combined_df[col]):
+                            combined_df[col] = pd.to_datetime(combined_df[col])
+                            print(f"Converted column '{col}' to datetime")
+                    except Exception as e:
+                        print(f"Could not convert column '{col}' to datetime: {str(e)}")
+            
+            # Sort by minute (ascending order - oldest first)
+            try:
+                if 'minute' in combined_df.columns:
+                    combined_df = combined_df.sort_values(by='minute')
+                    print("Data sorted by minute")
+                # Sort by alternative time column if 'minute' not present
+                else:
+                    time_cols = [col for col in combined_df.columns if 'time' in col.lower() or 'date' in col.lower()]
+                    if time_cols:
+                        combined_df = combined_df.sort_values(by=time_cols[0])
+                        print(f"Data sorted by {time_cols[0]}")
+            except Exception as e:
+                print(f"Error during sorting: {str(e)}")
+            
+            # Reset index after sorting
+            combined_df = combined_df.reset_index(drop=True)
+            print("Index reset after sorting")
+            
+            # Set blockchain column
             combined_df['blockchain'] = 'solana'
+            
             # Save the combined dataframe
-            combined_df.to_csv(f'./metrics_cache/{query_id}.csv', index=False)
-            print("\nResults saved to solana_transaction_fees.csv")
+            combined_df.to_csv(file_path, index=False)
+            print(f"\nResults saved to {file_path}")
         else:
             print("No data returned from query")
         
@@ -81,10 +122,18 @@ def analyze_transaction_fees(query_id=4688078):
         print(f"Error: {str(e)}")
         return None
 
+#Important
 def get_transaction_fees_and_failure_df(query_id):
     transaction_fees_and_failure_df = analyze_transaction_fees(query_id)
     transaction_fees_and_failure_df['blockchain'] = 'solana'
     return transaction_fees_and_failure_df
+
+def get_trading_activity_query_by_minutes(query_id):
+    trading_activity_query_by_hours = '4688333'
+    trading_actiivty_by_hours = analyze_transaction_fees(trading_activity_query_by_hours)
+    trading_actiivty_by_hours['blockchain'] = 'solana'
+    return trading_actiivty_by_hours
+    
 
 def get_minting_activity_query_by_minutes(query_id):
     minting_activity_query_by_minutes = "4688181"
@@ -92,57 +141,93 @@ def get_minting_activity_query_by_minutes(query_id):
     nft_minting_activity_by_hour['blockchain'] = 'solana'
     return minting_activity_query_by_minutes
 
-def get_trading_activity_query_by_hours(query_id):
-    trading_activity_query_by_hours = '4688333'
-    trading_actiivty_by_hours = analyze_transaction_fees(trading_activity_query_by_hours)
-    trading_actiivty_by_hours['blockchain'] = 'solana'
-    return trading_actiivty_by_hours
+def merge_metrics_files(file_paths, output_path, merge_column='minute'):
+    """
+    Merge multiple metrics CSV files and handle duplicate indices.
     
+    Args:
+        file_paths (list): List of file paths to merge
+        output_path (str): Path to save the merged file
+        merge_column (str): Column to use for merging
+    
+    Returns:
+        DataFrame: The merged DataFrame or None if error
+    """
+    try:
+        dfs = []
+        
+        # Load each file
+        for file_path in file_paths:
+            if os.path.exists(file_path):
+                df = pd.read_csv(file_path)
+                
+                # Convert time columns to datetime
+                for col in df.columns:
+                    if 'minute' in col.lower() or 'time' in col.lower() or 'date' in col.lower():
+                        try:
+                            if not pd.api.types.is_datetime64_any_dtype(df[col]):
+                                df[col] = pd.to_datetime(df[col])
+                        except Exception as e:
+                            print(f"Could not convert column '{col}' to datetime in {file_path}: {str(e)}")
+                
+                dfs.append(df)
+                print(f"Loaded {file_path}, shape: {df.shape}")
+            else:
+                print(f"Warning: File not found: {file_path}")
+        
+        if not dfs:
+            print("No valid files to merge")
+            return None
+        
+        # Concatenate with ignore_index=True to avoid duplicate index issues
+        merged_df = pd.concat(dfs, ignore_index=True)
+        print(f"Initial merge complete, shape: {merged_df.shape}")
+        
+        # Drop duplicates if needed
+        if merge_column in merged_df.columns:
+            duplicates_count = merged_df.duplicated(subset=[merge_column]).sum()
+            print(f"Found {duplicates_count} duplicate rows based on {merge_column}")
+            if duplicates_count > 0:
+                merged_df = merged_df.drop_duplicates(subset=[merge_column], keep='first')
+                print(f"After dropping duplicates, shape: {merged_df.shape}")
+        
+        # Sort by time column
+        if merge_column in merged_df.columns:
+            merged_df = merged_df.sort_values(by=merge_column)
+            print(f"Sorted by {merge_column}")
+        
+        # Reset index
+        merged_df = merged_df.reset_index(drop=True)
+        
+        # Save merged result
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        merged_df.to_csv(output_path, index=False)
+        print(f"Merged data saved to {output_path}")
+        
+        return merged_df
+    
+    except Exception as e:
+        print(f"Error concatenating metrics: {str(e)}")
+        return None
+
 # # Execute the analysis
 if __name__ == "__main__":
+    load_dotenv()
 
     while True:
-
         print("Fetching Solana transaction fee and failure data...")
-        transaction_fees_and_failure_df = analyze_transaction_fees()
-    
-        print("Fetching NFT minting activity by hour")
-        minting_activity_query_by_minutes = "4688181"
-        nft_minting_activity_by_hour = analyze_transaction_fees(minting_activity_query_by_minutes)
+        transaction_fees_and_failure_df = analyze_transaction_fees(query_id=4688078)
 
-        trading_activity_query_by_hours = '4688333'
-        print('Fetching NFT Trading Volume in hours')
-        trading_actiivty_by_hours = analyze_transaction_fees(trading_activity_query_by_hours)
+        trading_activity_query_by_minutes = '4688333'
+        print('Fetching Solana Trading Volume in minutes')
+        trading_activity_by_minutes = analyze_transaction_fees(trading_activity_query_by_minutes)
+
+
+        # print("Fetching NFT minting activity by hour")
+        # minting_activity_query_by_minutes = "4688181"
+        # nft_minting_activity_by_hour = analyze_transaction_fees(minting_activity_query_by_minutes)
+
+
         
         time.sleep(30)
 
-#     # # Create a list of dataframes, only including those that are actually dataframes
-#     # dfs_to_combine = []
-    
-#     # if isinstance(get_tps_df, pd.DataFrame):
-#     #     dfs_to_combine.append(get_tps_df.reset_index(drop=True))
-    
-#     # if isinstance(trading_actiivty_by_hours, pd.DataFrame):
-#     #     dfs_to_combine.append(trading_actiivty_by_hours.reset_index(drop=True))
-    
-#     # if isinstance(minting_activity_query_by_minutes, pd.DataFrame):
-#     #     dfs_to_combine.append(minting_activity_query_by_minutes.reset_index(drop=True))
-    
-#     # if isinstance(transaction_fees_and_failure_df, pd.DataFrame):
-#     #     dfs_to_combine.append(transaction_fees_and_failure_df.reset_index(drop=True))
-    
-#     # # Only combine if we have dataframes to combine
-#     # if dfs_to_combine:
-#     #     df_combined = pd.concat(dfs_to_combine, axis=1)
-#     #     # Move dropna to the combined DataFrame instead of the list
-#     #     df_combined.dropna(inplace=True)
-#     #     print(df_combined)
-#     #     df_combined.to_csv('combined_df.csv')
-#     # else:
-#     #     print("No valid DataFrames to combine")
-
-#     print(dfs_to_combine)
-
-
-# Created/Modified files during execution:
-# - solana_transaction_fees.csv

@@ -242,7 +242,7 @@ const NetworkContent = ({ onNetworkStatsUpdate }) => {
             console.error('Error:', err);
         } finally {
             // Keep the refresh animation visible for at least 800ms
-            setTimeout(() => setIsRefreshing(false), 1500);
+            setTimeout(() => setIsRefreshing(false), 5000);
         }
     }, [isRefreshing]); // Only depends on isRefreshing state to prevent concurrent fetches
 
