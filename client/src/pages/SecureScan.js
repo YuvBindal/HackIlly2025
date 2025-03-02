@@ -207,21 +207,32 @@ const SecureScan = () => {
               <div className="code-display">
                 <h4>Code Analysis:</h4>
                 <div className="code-container" ref={codeContainerRef}>
-                  {displayedCode.map((line, index) => (
-                    <pre 
-                      key={index} 
-                      className={`code-line ${
-                        securityScanResult.Lines.find(l => l[0] === index+1)
-                          ? securityScanResult.Lines.find(l => l[0] === index+1)[2] === 'Good' 
-                            ? 'good-line' 
-                            : 'bad-line'
-                          : ''
-                      }`}
-                    >
-                      <span className="line-number">{index + 1}</span>
-                      <span className="line-content">{line}</span>
-                    </pre>
-                  ))}
+                  {displayedCode.map((line, index) => {
+                    // Find if this line has an annotation
+                    const lineAnnotation = securityScanResult.Lines.find(l => l[0] === index+1);
+                    const isGoodLine = lineAnnotation && lineAnnotation[2] === 'Good';
+                    const isBadLine = lineAnnotation && lineAnnotation[2] === 'Bad';
+                    const lineDescription = lineAnnotation ? lineAnnotation[1] : '';
+                    
+                    return (
+                      <pre 
+                        key={index} 
+                        className={`code-line ${isGoodLine ? 'good-line' : isBadLine ? 'bad-line' : ''}`}
+                        title={lineDescription} // Add tooltip with the description
+                      >
+                        <span className="line-number">{index + 1}</span>
+                        <span className="line-content">{line}</span>
+                        {(isGoodLine || isBadLine) && (
+                          <div className="line-tooltip">
+                            <span className={`tooltip-indicator ${isGoodLine ? 'good' : 'bad'}`}>
+                              {isGoodLine ? '✓' : '!'} 
+                            </span>
+                            <span className="tooltip-text">{lineDescription}</span>
+                          </div>
+                        )}
+                      </pre>
+                    );
+                  })}
                 </div>
               </div>
               
