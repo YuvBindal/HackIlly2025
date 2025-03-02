@@ -228,11 +228,14 @@ const SecureScan = () => {
               <div className="issues-list">
                 <h4>Identified Issues:</h4>
                 <ul>
-                  {securityScanResult.Lines.filter(line => line[2] === 'Bad').map((line, index) => (
-                    <li key={index} className="issue-item">
-                      <span className="line-ref">Line {line[0]}:</span> {line[1]}
-                    </li>
-                  ))}
+                  {securityScanResult.Lines
+                    .filter(line => line[2] === 'Bad')
+                    .sort((a, b) => a[0] - b[0]) // Sort by line number (first element in each line array)
+                    .map((line, index) => (
+                      <li key={index} className="issue-item">
+                        <span className="line-ref">Line {line[0]}:</span> {line[1]}
+                      </li>
+                    ))}
                 </ul>
               </div>
               
